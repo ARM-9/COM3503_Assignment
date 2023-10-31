@@ -1,0 +1,28 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "/home/satellizer/Documents/jogl/jar/gluegen.jar",
+        "/home/satellizer/Documents/jogl/jar/gluegen-rt.jar",
+        "/home/satellizer/Documents/jogl/jar/gluegen-rt-natives-linux-aarch64.jar",
+        "/home/satellizer/Documents/jogl/jar/gluegen-rt-natives-linux-amd64.jar",
+        "/home/satellizer/Documents/jogl/jar/gluegen-rt-natives-linux-armv6hf.jar",
+        "/home/satellizer/Documents/jogl/jar/gluegen-rt-natives-macosx-universal.jar",
+        "/home/satellizer/Documents/jogl/jar/gluegen-rt-natives-windows-amd64.jar",
+        "/home/satellizer/Documents/jogl/jar/gluegen-test-util.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-all.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-all-natives-linux-aarch64.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-all-natives-linux-amd64.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-all-natives-linux-armv6hf.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-all-natives-macosx-universal.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-all-natives-windows-amd64.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-all-noawt.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-all-noawt-natives-linux-aarch64.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-all-noawt-natives-linux-amd64.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-all-noawt-natives-linux-armv6hf.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-all-noawt-natives-macosx-universal.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-all-noawt-natives-windows-amd64.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-demos.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-fonts-p0.jar",
+        "/home/satellizer/Documents/jogl/jar/jogl-test.jar"
+    ]
+}

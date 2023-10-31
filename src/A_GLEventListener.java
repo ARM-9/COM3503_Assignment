@@ -10,11 +10,11 @@ import com.jogamp.opengl.util.texture.*;
 import com.jogamp.opengl.util.texture.awt.*;
 import com.jogamp.opengl.util.texture.spi.JPEGImage;
   
-public class M04_GLEventListener implements GLEventListener {
+public class A_GLEventListener implements GLEventListener {
   
   private static final boolean DISPLAY_SHADERS = false;
     
-  public M04_GLEventListener(Camera camera) {
+  public A_GLEventListener(Camera camera) {
     this.camera = camera;
     this.camera.setPosition(new Vec3(4f,12f,18f));
   }
@@ -57,8 +57,8 @@ public class M04_GLEventListener implements GLEventListener {
   public void dispose(GLAutoDrawable drawable) {
     GL3 gl = drawable.getGL().getGL3();
     light.dispose(gl);
-    floor.dispose(gl);
-    robot.dispose(gl);
+    // floor.dispose(gl);
+    alien.dispose(gl);
   }
   
   
@@ -83,21 +83,19 @@ public class M04_GLEventListener implements GLEventListener {
   }
    
   public void incXPosition() {
-    robot.incXPosition();
+    
   }
    
   public void decXPosition() {
-    robot.decXPosition();
+    
   }
   
   public void loweredArms() {
-    stopAnimation();
-    robot.loweredArms();
+    
   }
    
   public void raisedArms() {
-    stopAnimation();
-    robot.raisedArms();
+    
   }
   
   // ***************************************************
@@ -111,51 +109,44 @@ public class M04_GLEventListener implements GLEventListener {
 
   private Camera camera;
   private Mat4 perspective;
-  private Model floor;
+  // private Model floor;
   private Light light;
-  //private SGNode robotRoot;
   
-  private Robot robot;
+  private Alien alien;
 
   private void initialise(GL3 gl) {
     createRandomNumbers();
 
     textures = new TextureLibrary();
-    textures.add(gl, "chequerboard", "textures/chequerboard.jpg");
     textures.add(gl, "jade_diffuse", "textures/jade.jpg");
     textures.add(gl, "jade_specular", "textures/jade_specular.jpg");
-    textures.add(gl, "container_diffuse", "textures/container2.jpg");
-    textures.add(gl, "container_specular", "textures/container2_specular.jpg");
-    textures.add(gl, "watt_diffuse", "textures/wattBook.jpg");
-    textures.add(gl, "watt_specular", "textures/wattBook_specular.jpg");
     
     light = new Light(gl);
     light.setCamera(camera);
     
     // floor
-    String name = "floor";
-    Mesh mesh = new Mesh(gl, TwoTriangles.vertices.clone(), TwoTriangles.indices.clone());
-    Shader shader = new Shader(gl, "vs_standard.txt", "fs_standard_1t.txt");
-    Material material = new Material(new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.3f, 0.3f, 0.3f), 32.0f);
-    Mat4 modelMatrix = Mat4Transform.scale(16,1f,16);
-    floor = new Model(name, mesh, modelMatrix, shader, material, light, camera, textures.get("chequerboard"));
+    // String name = "floor";
+    // Mesh mesh = new Mesh(gl, TwoTriangles.vertices.clone(), TwoTriangles.indices.clone());
+    // Shader shader = new Shader(gl, "vs_standard.txt", "fs_standard_1t.txt");
+    // Material material = new Material(new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.3f, 0.3f, 0.3f), 32.0f);
+    // Mat4 modelMatrix = Mat4Transform.scale(16,1f,16);
+    // floor = new Model(name, mesh, modelMatrix, shader, material, light, camera, textures.get("chequerboard"));
     
-    robot = new Robot(gl, camera, light, 
-                      textures.get("jade_diffuse"), textures.get("jade_specular"),
-                      textures.get("container_diffuse"), textures.get("container_specular"),
-                      textures.get("watt_diffuse"), textures.get("watt_specular")); 
+    alien = new Alien(gl, camera, light, 
+                      textures.get("jade_diffuse"), textures.get("jade_specular")
+                      ); 
   }
  
   private void render(GL3 gl) {
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
     light.setPosition(getLightPosition());  // changing light position each frame
     light.render(gl);
-    floor.render(gl); 
+    // floor.render(gl); 
     if (animation) {
       double elapsedTime = getSeconds()-startTime;
-      robot.updateAnimation(elapsedTime);
+      alien.updateAnimation(elapsedTime);
     }
-    robot.render(gl);
+    alien.render(gl);
   }
 
   

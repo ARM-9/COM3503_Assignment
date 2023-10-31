@@ -17,202 +17,235 @@ import com.jogamp.opengl.util.texture.spi.JPEGImage;
  * @version   1.0 (31/08/2022)
  */
 
-public class Robot {
+public class Alien {
 
   private Camera camera;
   private Light light;
 
-  private Model sphere, cube, cube2;
+  private Model sphere;
 
-  private SGNode robotRoot;
-  private float xPosition = 0;
-  private TransformNode translateX, robotMoveTranslate, leftArmRotate, rightArmRotate;
+  private SGNode alienRoot;
+  private TransformNode bodyRock, headRoll;
+  private TransformNode leftArmRotate, rightArmRotate;
+  private TransformNode leftEyeBlink, rightEyeBlink;
+  private TransformNode leftEarRotate, rightEarRotate;
+  private TransformNode antennaRotate;
    
-  public Robot(GL3 gl, Camera cameraIn, Light lightIn, Texture t1, Texture t2, Texture t3, Texture t4, Texture t5, Texture t6) {
+  public Alien(GL3 gl, Camera camera, Light light, Texture t1, Texture t2) {
 
-    this.camera = cameraIn;
-    this.light = lightIn;
+    this.camera = camera;
+    this.light = light;
 
     sphere = makeSphere(gl, t1,t2);
 
-    cube = makeCube(gl, t3,t4);
-    cube2 = makeCube(gl, t5,t6);
-
-    // robot
+    // alien
     
-    float bodyHeight = 3f;
-    float bodyWidth = 2f;
-    float bodyDepth = 1f;
+    float alienXPosition = 5; // Will change +/- depending on the alien (R/L)
+    float bodyScale = 2f;
     float headScale = 2f;
-    float armLength = 3.5f;
+    float armBendAngle = 30; // So that arms do not stick out completely straight
     float armScale = 0.5f;
-    float legLength = 3.5f;
-    float legScale = 0.67f;
+    float eyeOffset = 0.5f; // How far eyes are offset from centre of head
+    float eyeScale = 0.5f;
+    float earScale = 2f;
+    float antennaScale = 2f; // todo: Possibly make scales in Vec3s to make more complex ellipsoids
+    float antennaBallScale = 0.5f;
     
-    robotRoot = new NameNode("root");
-    robotMoveTranslate = new TransformNode("robot transform",Mat4Transform.translate(xPosition,0,0));
-    
-    TransformNode robotTranslate = new TransformNode("robot transform",Mat4Transform.translate(0,legLength,0));
-    
+    Mat4 m;
+
+    // Root
+
+    alienRoot = new NameNode("root");
+    TransformNode bodyUpTranslate = new TransformNode("position body (scene)", Mat4Transform.translate(alienXPosition, bodyScale/2, 0));
+    bodyRock = new TransformNode("rock body", Mat4Transform.rotateAroundZ(0));
+    TransformNode bodyDownTranslate = new TransformNode("position body (origin)", Mat4Transform.translate(0, -(bodyScale/2), 0));
+
+    // Body
+
     NameNode body = new NameNode("body");
-      Mat4 m = Mat4Transform.scale(bodyWidth,bodyHeight,bodyDepth);
-      m = Mat4.multiply(m, Mat4Transform.translate(0,0.5f,0));
-      TransformNode bodyTransform = new TransformNode("body transform", m);
-        ModelNode bodyShape = new ModelNode("Cube(body)", cube);
+    m = new Mat4(1);
+    m = Mat4.multiply(m, Mat4Transform.scale(bodyScale, bodyScale, bodyScale));
+    m = Mat4.multiply(m, Mat4Transform.translate(0,0.5f,0));
+    TransformNode bodyTransform = new TransformNode("position body", m);
+    ModelNode bodyShape = new ModelNode("Sphere(body)", sphere);
 
+    // Arms
+
+    TransformNode leftArmTranslate = new TransformNode("position left arm", Mat4Transform.translate(-(bodyScale/2), bodyScale/2, 0));
+    leftArmRotate = new TransformNode("rotate left arm", Mat4Transform.rotateAroundX(0));
+    TransformNode leftArmBend = new TransformNode("bend left arm", Mat4Transform.rotateAroundZ(-armBendAngle));
+
+    NameNode leftArm = new NameNode("left arm");
+    m = new Mat4(1);
+    m = Mat4.multiply(m, Mat4Transform.translate(-armScale, 0, 0));
+    m = Mat4.multiply(m, Mat4Transform.scale(armScale, 0, 0));
+    m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
+    TransformNode leftArmTransform = new TransformNode("position left arm", m);
+    ModelNode leftArmShape = new ModelNode("Sphere(left arm)", sphere);
+
+    TransformNode rightArmTranslate = new TransformNode("position right arm", Mat4Transform.translate(bodyScale/2, bodyScale/2, 0));
+    rightArmRotate = new TransformNode("rotate right arm", Mat4Transform.rotateAroundX(0));
+    TransformNode rightArmBend = new TransformNode("bend right arm", Mat4Transform.rotateAroundZ(armBendAngle));
+
+    NameNode rightArm = new NameNode("right arm");
+    m = new Mat4(1);
+    m = Mat4.multiply(m, Mat4Transform.translate(armScale, 0, 0));
+    m = Mat4.multiply(m, Mat4Transform.scale(armScale, 0, 0));
+    m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
+    TransformNode rightArmTransform = new TransformNode("position right arm", m);
+    ModelNode rightArmShape = new ModelNode("Sphere(right arm)", sphere);
+    
+    // Head
+
+    TransformNode headTopTranslate = new TransformNode("position head (body top)", Mat4Transform.translate(0, bodyScale/2, 0));
+    headRoll = new TransformNode("roll head", Mat4Transform.rotateAroundZ(0));
+    TransformNode headCentreTranslate = new TransformNode("position head (body centre)", Mat4Transform.translate(0, bodyScale/2, 0));
+    
     NameNode head = new NameNode("head"); 
-      m = new Mat4(1);
-      m = Mat4.multiply(m, Mat4Transform.translate(0,bodyHeight,0));
-      m = Mat4.multiply(m, Mat4Transform.scale(headScale,headScale,headScale));
-      m = Mat4.multiply(m, Mat4Transform.translate(0,0.5f,0));
-      TransformNode headTransform = new TransformNode("head transform", m);
-        ModelNode headShape = new ModelNode("Sphere(head)", sphere);
+    m = new Mat4(1);
+    m = Mat4.multiply(m, Mat4Transform.scale(headScale, headScale, headScale));
+    m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
+    TransformNode headTransform = new TransformNode("position head", m);
+    ModelNode headShape = new ModelNode("Sphere(head)", sphere);
 
-   // This set of nodes includes nodes for creating the arm and controlling its animation and attaching it to the body.
-   NameNode leftarm = new NameNode("left arm");
-      TransformNode leftArmTranslate = new TransformNode("leftarm translate", 
-                                           Mat4Transform.translate((bodyWidth*0.5f)+(armScale*0.5f),bodyHeight,0));
-      leftArmRotate = new TransformNode("leftarm rotate",Mat4Transform.rotateAroundX(180));
-      m = new Mat4(1);
-      m = Mat4.multiply(m, Mat4Transform.scale(armScale,armLength,armScale));
-      m = Mat4.multiply(m, Mat4Transform.translate(0,0.5f,0));
-      TransformNode leftArmScale = new TransformNode("leftarm scale", m);
-        ModelNode leftArmShape = new ModelNode("Cube(left arm)", cube2);
+    // Eyes
 
-    // similar to the left arm
-    NameNode rightarm = new NameNode("right arm");
-      TransformNode rightArmTranslate = new TransformNode("rightarm translate", 
-                                            Mat4Transform.translate(-(bodyWidth*0.5f)-(armScale*0.5f),bodyHeight,0));
-      rightArmRotate = new TransformNode("rightarm rotate",Mat4Transform.rotateAroundX(180));
-      m = new Mat4(1);
-      m = Mat4.multiply(m, Mat4Transform.scale(armScale,armLength,armScale));
-      m = Mat4.multiply(m, Mat4Transform.translate(0,0.5f,0));
-      TransformNode rightArmScale = new TransformNode("rightarm scale", m);
-        ModelNode rightArmShape = new ModelNode("Cube(right arm)", cube2);
-    
-    // This set of nodes ncludes nodes for creating the leg and attaching it to the body.
-    NameNode leftleg = new NameNode("left leg");
-      m = new Mat4(1);
-      m = Mat4.multiply(m, Mat4Transform.translate((bodyWidth*0.5f)-(legScale*0.5f),0,0));
-      m = Mat4.multiply(m, Mat4Transform.rotateAroundX(180));
-      m = Mat4.multiply(m, Mat4Transform.scale(legScale,legLength,legScale));
-      m = Mat4.multiply(m, Mat4Transform.translate(0,0.5f,0));
-      TransformNode leftlegTransform = new TransformNode("leftleg transform", m);
-        ModelNode leftLegShape = new ModelNode("Cube(leftleg)", cube);
-    
-    NameNode rightleg = new NameNode("right leg");
-      m = new Mat4(1);
-      m = Mat4.multiply(m, Mat4Transform.translate(-(bodyWidth*0.5f)+(legScale*0.5f),0,0));
-      m = Mat4.multiply(m, Mat4Transform.rotateAroundX(180));
-      m = Mat4.multiply(m, Mat4Transform.scale(legScale,legLength,legScale));
-      m = Mat4.multiply(m, Mat4Transform.translate(0,0.5f,0));
-      TransformNode rightlegTransform = new TransformNode("rightleg transform", m);
-        ModelNode rightLegShape = new ModelNode("Cube(rightleg)", cube);
-    
-    //Once all the pieces are created, then the whole robot can be created.
-    robotRoot.addChild(robotMoveTranslate);
-      robotMoveTranslate.addChild(robotTranslate);
-        robotTranslate.addChild(body);
-          body.addChild(bodyTransform);
-            bodyTransform.addChild(bodyShape);
-          body.addChild(head);
-            head.addChild(headTransform);
-            headTransform.addChild(headShape);
-          body.addChild(leftarm);
-            leftarm.addChild(leftArmTranslate);
-            leftArmTranslate.addChild(leftArmRotate);
-            leftArmRotate.addChild(leftArmScale);
-            leftArmScale.addChild(leftArmShape);
-          body.addChild(rightarm);
-            rightarm.addChild(rightArmTranslate);
-            rightArmTranslate.addChild(rightArmRotate);
-            rightArmRotate.addChild(rightArmScale);
-            rightArmScale.addChild(rightArmShape);
-          body.addChild(leftleg);
-            leftleg.addChild(leftlegTransform);
-            leftlegTransform.addChild(leftLegShape);
-          body.addChild(rightleg);
-            rightleg.addChild(rightlegTransform);
-            rightlegTransform.addChild(rightLegShape);
-    
-    robotRoot.update();  // IMPORTANT - don't forget this
+    TransformNode leftEyeTranslate = new TransformNode("position left eye", Mat4Transform.translate(-eyeOffset, headScale/2, 0));
 
-    // // The above scene graph could also have been made as separate pieces before making the whole.
-    // // Create head
-    // head.addChild(headTransform);
-    //   headTransform.addChild(headShape);
-    // // create left arm
-    // leftarm.addChild(leftArmTranslate);
-    //   leftArmTranslate.addChild(leftArmRotate);
-    //     leftArmRotate.addChild(leftArmScale);
-    //       leftArmScale.addChild(leftArmShape);
-    // // create right arm
-    // rightarm.addChild(rightArmTranslate);
-    //   rightArmTranslate.addChild(rightArmRotate);
-    //     rightArmRotate.addChild(rightArmScale);
-    //       rightArmScale.addChild(rightArmShape);
-    // // create leftleg
-    // leftleg.addChild(leftlegTransform);
-    //   leftlegTransform.addChild(leftLegShape);
-    // // create rightleg
-    // rightleg.addChild(rightlegTransform);
-    //   rightlegTransform.addChild(rightLegShape);
-    // // create the body and attach pieces
-    // body.addChild(bodyTransform);
-    //   bodyTransform.addChild(bodyShape);
-    // body.addChild(head);
-    // body.addChild(leftarm);
-    // body.addChild(rightarm);
-    // body.addChild(leftleg);
-    // body.addChild(rightleg);
-    // // now build the robot
-    //  robotRoot.addChild(robotMoveTranslate);
-    //   robotMoveTranslate.addChild(robotTranslate);
-    //     robotTranslate.addChild(body);
+    NameNode leftEye = new NameNode("left eye");
+    leftEyeBlink = new TransformNode("blink left eye", Mat4Transform.scale(0, 0, 0));
+    m = new Mat4(1);
+    m = Mat4.multiply(m, Mat4Transform.scale(eyeScale, eyeScale, eyeScale));
+    m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
+    TransformNode leftEyeTransform = new TransformNode("position left eye", m);
+    ModelNode leftEyeShape = new ModelNode("Sphere(left eye)", sphere);
+    
+    TransformNode rightEyeTranslate = new TransformNode("position right eye", Mat4Transform.translate(eyeOffset, headScale/2, 0));
 
-    // robotRoot.update();  // IMPORTANT - don't forget this
+    NameNode rightEye = new NameNode("right eye");
+    rightEyeBlink = new TransformNode("blink right eye", Mat4Transform.scale(0, 0, 0));
+    m = new Mat4(1);
+    m = Mat4.multiply(m, Mat4Transform.scale(eyeScale, eyeScale, eyeScale));
+    m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
+    TransformNode rightEyeTransform = new TransformNode("position right eye", m);
+    ModelNode rightEyeShape = new ModelNode("Sphere(right eye)", sphere);
+
+    // Ears
+
+    TransformNode leftEarTranslate = new TransformNode("position left ear", Mat4Transform.translate(-(headScale/2), headScale/2, 0));
+    leftEarRotate = new TransformNode("rotate left ear", Mat4Transform.rotateAroundY(0));
+
+    NameNode leftEar = new NameNode("left ear");
+    m = new Mat4(1);
+    m = Mat4.multiply(m, Mat4Transform.scale(0, earScale, 0));
+    m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
+    TransformNode leftEarTransform = new TransformNode("left ear transform", m);
+    ModelNode leftEarShape = new ModelNode("Sphere(left ear)", sphere);
+
+    TransformNode rightEarTranslate = new TransformNode("position right ear", Mat4Transform.translate(headScale/2, headScale/2, 0));
+    rightEarRotate = new TransformNode("rotate right ear", Mat4Transform.rotateAroundY(0));
+
+    NameNode rightEar = new NameNode("right ear");
+    m = new Mat4(1);
+    m = Mat4.multiply(m, Mat4Transform.scale(0, earScale, 0)); // Todo add ear scale attr
+    m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
+    TransformNode rightEarTransform = new TransformNode("right ear transform", m);
+    ModelNode rightEarShape = new ModelNode("Sphere(right ear)", sphere);
+
+    // Antenna
+
+    TransformNode antennaTranslate = new TransformNode("position antenna", Mat4Transform.translate(0, headScale, 0));
+    antennaRotate = new TransformNode("rotate antenna", Mat4Transform.rotateAroundY(0));
+
+    NameNode antennaRod = new NameNode("Antenna rod");
+    m = new Mat4(1);
+    m = Mat4.multiply(m, Mat4Transform.scale(0, antennaScale, 0));
+    m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
+    TransformNode antennaRodTransform = new TransformNode("antenna rod transform", m);
+    ModelNode antennaRodShape = new ModelNode("Sphere(antenna rod)", sphere);
+
+    m = Mat4Transform.translate(0, antennaScale, 0);
+    TransformNode antennaBallTranslate = new TransformNode("position antenna ball", m);
+    
+    NameNode antennaBall = new NameNode("Antenna ball");
+    m = new Mat4(1);
+    m = Mat4.multiply(m, Mat4Transform.scale(antennaBallScale, antennaBallScale, antennaBallScale));
+    m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
+    TransformNode antennaBallTransform = new TransformNode("antenna ball transform", m);
+    ModelNode antennaBallShape = new ModelNode("Sphere(antenna ball)", sphere);
+
+    // Scene graph hierarchy
+
+    alienRoot.addChild(bodyUpTranslate);
+      bodyUpTranslate.addChild(bodyRock);
+      bodyRock.addChild(bodyDownTranslate);
+      bodyDownTranslate.addChild(body);
+      body.addChild(bodyTransform);
+        bodyTransform.addChild(bodyShape);
+      body.addChild(leftArmTranslate);
+        leftArmTranslate.addChild(leftArmRotate);
+        leftArmRotate.addChild(leftArmBend);
+        leftArmBend.addChild(leftArm);
+        leftArm.addChild(leftArmTransform);
+        leftArmTransform.addChild(leftArmShape);
+      body.addChild(rightArmTranslate);
+        rightArmTranslate.addChild(rightArmRotate);
+        rightArmRotate.addChild(rightArmBend);
+        rightArmBend.addChild(rightArm);
+        rightArm.addChild(rightArmTransform);
+        rightArmTransform.addChild(rightArmShape);
+      body.addChild(headTopTranslate);
+        headTopTranslate.addChild(headRoll);
+        headRoll.addChild(headCentreTranslate);
+        headCentreTranslate.addChild(head);
+          head.addChild(headTransform);
+          headTransform.addChild(headShape);
+        headCentreTranslate.addChild(leftEyeTranslate);
+          leftEyeTranslate.addChild(leftEye);
+          leftEye.addChild(leftEyeBlink);
+          leftEyeBlink.addChild(leftEyeTransform);
+          leftEyeTransform.addChild(leftEyeShape);
+        headCentreTranslate.addChild(rightEyeTranslate);
+          rightEyeTranslate.addChild(rightEye);
+          rightEye.addChild(rightEyeBlink);
+          rightEyeBlink.addChild(rightEyeTransform);
+          rightEyeTransform.addChild(rightEyeShape);
+        headCentreTranslate.addChild(leftEarTranslate);
+          leftEarTranslate.addChild(leftEarRotate);
+          leftEarRotate.addChild(leftEar);
+          leftEar.addChild(leftEarTransform);
+          leftEarTransform.addChild(leftEarShape);
+        headCentreTranslate.addChild(rightEarTranslate);
+          rightEarTranslate.addChild(rightEarRotate);
+          rightEarRotate.addChild(rightEar);
+          rightEar.addChild(rightEarTransform);
+          rightEarTransform.addChild(rightEarShape);
+        headCentreTranslate.addChild(antennaTranslate);
+          antennaTranslate.addChild(antennaRotate);
+          antennaRotate.addChild(antennaRod);
+            antennaRod.addChild(antennaRodTransform);
+            antennaRodTransform.addChild(antennaRodShape);
+          antennaRotate.addChild(antennaBallTranslate);
+            antennaBallTranslate.addChild(antennaBall);
+            antennaBall.addChild(antennaBallTransform);
+            antennaBallTransform.addChild(antennaBallShape); 
+    
+    alienRoot.update();  // IMPORTANT - don't forget this
 
   }
 
   private Model makeSphere(GL3 gl, Texture t1, Texture t2) {
     String name= "sphere";
     Mesh mesh = new Mesh(gl, Sphere.vertices.clone(), Sphere.indices.clone());
-    Shader shader = new Shader(gl, "vs_standard.txt", "fs_standard_2t.txt");
+    Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_2t.txt");
     Material material = new Material(new Vec3(1.0f, 0.5f, 0.31f), new Vec3(1.0f, 0.5f, 0.31f), new Vec3(0.5f, 0.5f, 0.5f), 32.0f);
     Mat4 modelMatrix = Mat4.multiply(Mat4Transform.scale(4,4,4), Mat4Transform.translate(0,0.5f,0));
     Model sphere = new Model(name, mesh, modelMatrix, shader, material, light, camera, t1, t2);
     return sphere;
   } 
 
-  private Model makeCube(GL3 gl, Texture t1, Texture t2) {
-    String name= "cube";
-    Mesh mesh = new Mesh(gl, Cube.vertices.clone(), Cube.indices.clone());
-    Shader shader = new Shader(gl, "vs_standard.txt", "fs_standard_2t.txt");
-    Material material = new Material(new Vec3(1.0f, 0.5f, 0.31f), new Vec3(1.0f, 0.5f, 0.31f), new Vec3(0.5f, 0.5f, 0.5f), 32.0f);
-    Mat4 modelMatrix = Mat4.multiply(Mat4Transform.scale(4,4,4), Mat4Transform.translate(0,0.5f,0));
-    Model cube = new Model(name, mesh, modelMatrix, shader, material, light, camera, t1, t2);
-    return cube;
-  } 
-
   public void render(GL3 gl) {
-    robotRoot.draw(gl);
-  }
-
-  public void incXPosition() {
-    xPosition += 0.5f;
-    if (xPosition>5f) xPosition = 5f;
-    updateMove();
-  }
-   
-  public void decXPosition() {
-    xPosition -= 0.5f;
-    if (xPosition<-5f) xPosition = -5f;
-    updateMove();
-  }
- 
-  private void updateMove() {
-    robotMoveTranslate.setTransform(Mat4Transform.translate(xPosition,0,0));
-    robotMoveTranslate.update();
+    alienRoot.draw(gl);
   }
 
   // only does left arm
@@ -225,23 +258,34 @@ public class Robot {
     rightArmRotate.update();
   }
 
-  public void loweredArms() {
-    leftArmRotate.setTransform(Mat4Transform.rotateAroundX(180));
-    leftArmRotate.update();
-    rightArmRotate.setTransform(Mat4Transform.rotateAroundX(180));
-    rightArmRotate.update();
+  public void rockHead(double elapsedTime) {
+    bodyRock.setTransform(Mat4Transform.rotateAroundZ(0));
   }
 
-  public void raisedArms() {
+  public void rotateArmsAnimation(double elapsedTime) {
     leftArmRotate.setTransform(Mat4Transform.rotateAroundX(0));
-    leftArmRotate.update();
     rightArmRotate.setTransform(Mat4Transform.rotateAroundX(0));
-    rightArmRotate.update();
+  }
+
+  public void rollHead(double elapsedTime) {
+    headRoll.setTransform(Mat4Transform.rotateAroundZ(0));
+  }
+
+  public void blinkEyesAnimation(double elapsedTime) {
+    leftEyeBlink.setTransform(Mat4Transform.scale(0, 0, 0));
+    rightEyeBlink.setTransform(Mat4Transform.scale(0, 0, 0));
+  }
+
+  public void rotateEarsAnimation(double elapsedTime) {
+    leftEarRotate.setTransform(Mat4Transform.rotateAroundY(0));
+    rightEarRotate.setTransform(Mat4Transform.rotateAroundY(0));
+  }
+
+  public void rotateAntennaAnimation(double elapsedTime) {
+    antennaRotate.setTransform(Mat4Transform.rotateAroundY(0));
   }
 
   public void dispose(GL3 gl) {
     sphere.dispose(gl);
-    cube.dispose(gl);
-    cube2.dispose(gl);
   }
 }
