@@ -57,7 +57,7 @@ public class A_GLEventListener implements GLEventListener {
   public void dispose(GLAutoDrawable drawable) {
     GL3 gl = drawable.getGL().getGL3();
     light.dispose(gl);
-    // floor.dispose(gl);
+    floor.dispose(gl);
     alien.dispose(gl);
   }
   
@@ -109,7 +109,7 @@ public class A_GLEventListener implements GLEventListener {
 
   private Camera camera;
   private Mat4 perspective;
-  // private Model floor;
+  private Model floor;
   private Light light;
   
   private Alien alien;
@@ -125,12 +125,12 @@ public class A_GLEventListener implements GLEventListener {
     light.setCamera(camera);
     
     // floor
-    // String name = "floor";
-    // Mesh mesh = new Mesh(gl, TwoTriangles.vertices.clone(), TwoTriangles.indices.clone());
-    // Shader shader = new Shader(gl, "vs_standard.txt", "fs_standard_1t.txt");
-    // Material material = new Material(new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.3f, 0.3f, 0.3f), 32.0f);
-    // Mat4 modelMatrix = Mat4Transform.scale(16,1f,16);
-    // floor = new Model(name, mesh, modelMatrix, shader, material, light, camera, textures.get("chequerboard"));
+    String name = "floor";
+    Mesh mesh = new Mesh(gl, TwoTriangles.vertices.clone(), TwoTriangles.indices.clone());
+    Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_2t.txt");
+    Material material = new Material(new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.3f, 0.3f, 0.3f), 32.0f);
+    Mat4 modelMatrix = Mat4Transform.scale(16,1f,16);
+    floor = new Model(name, mesh, modelMatrix, shader, material, light, camera, textures.get("jade_diffuse"), textures.get("jade_specular"));
     
     alien = new Alien(gl, camera, light, 
                       textures.get("jade_diffuse"), textures.get("jade_specular")
@@ -141,7 +141,7 @@ public class A_GLEventListener implements GLEventListener {
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
     light.setPosition(getLightPosition());  // changing light position each frame
     light.render(gl);
-    // floor.render(gl); 
+    floor.render(gl); 
     if (animation) {
       double elapsedTime = getSeconds()-startTime;
       alien.updateAnimation(elapsedTime);
