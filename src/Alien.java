@@ -1,14 +1,7 @@
 import gmaths.*;
-
-import java.nio.*;
-import com.jogamp.common.nio.*;
+ 
 import com.jogamp.opengl.*;
-import com.jogamp.opengl.util.*;
-import com.jogamp.opengl.util.awt.*;
-import com.jogamp.opengl.util.glsl.*;
 import com.jogamp.opengl.util.texture.*;
-import com.jogamp.opengl.util.texture.awt.*;
-import com.jogamp.opengl.util.texture.spi.JPEGImage;
 
  /**
  * This class stores the Robot
@@ -20,7 +13,9 @@ import com.jogamp.opengl.util.texture.spi.JPEGImage;
 public class Alien {
 
   private Camera camera;
-  private Light light;
+  private Light light1;
+  private Light light2;
+  private Light spotlight;
 
   private Model sphere;
 
@@ -30,16 +25,26 @@ public class Alien {
   private TransformNode leftEarRotate, rightEarRotate;
   private TransformNode antennaRotate;
    
-  public Alien(GL3 gl, Camera camera, Light light, Texture t1, Texture t2) {
+  public Alien(GL3 gl, Camera camera, Light light1, Light light2, Light spotlight, Texture t1, Texture t2, float xPos) {
+    // TODO: Add a litt of textures as a parameter
+    // Textures with specular maps may be part of a pair list
+    // and singles may be part of another list
 
     this.camera = camera;
-    this.light = light;
+    this.light1 = light1;
+    this.light2 = light2;
+    this.spotlight = spotlight;
 
     sphere = makeSphere(gl, t1,t2);
+    // TODO: add other spheres for other textures
+    // where each part with a certain texture is
+    // represeted by its own sphere
+    // TODO: Make it so spheres can take colours instead of textures
 
     // alien
     
-    float alienXPosition = 0; // Will change +/- depending on the alien (R/L)
+    // Redundant
+    float alienXPosition = xPos; // Will change +/- depending on the alien (R/L)
     float bodyScale = 3f;
     float headScale = 2f;
     float armBendAngle = 30f; // So that arms do not stick out completely straight
@@ -74,7 +79,7 @@ public class Alien {
     // Arms
 
     TransformNode leftArmTranslate = new TransformNode("position left arm", Mat4Transform.translate(-(bodyScale/2), (bodyScale/2), 0));
-    leftArmRotate = new TransformNode("rotate left arm", Mat4Transform.rotateAroundX(-30));
+    leftArmRotate = new TransformNode("rotate left arm", Mat4Transform.rotateAroundX(0));
     TransformNode leftArmBend = new TransformNode("bend left arm", Mat4Transform.rotateAroundZ(-armBendAngle));
 
     NameNode leftArm = new NameNode("left arm");
@@ -85,7 +90,7 @@ public class Alien {
     ModelNode leftArmShape = new ModelNode("Sphere(left arm)", sphere);
 
     TransformNode rightArmTranslate = new TransformNode("position right arm", Mat4Transform.translate(bodyScale/2, (bodyScale/2), 0));
-    rightArmRotate = new TransformNode("rotate right arm", Mat4Transform.rotateAroundX(30));
+    rightArmRotate = new TransformNode("rotate right arm", Mat4Transform.rotateAroundX(0));
     TransformNode rightArmBend = new TransformNode("bend right arm", Mat4Transform.rotateAroundZ(armBendAngle));
 
     NameNode rightArm = new NameNode("right arm");
@@ -153,7 +158,7 @@ public class Alien {
     // Antenna
 
     TransformNode antennaTranslate = new TransformNode("position antenna", Mat4Transform.translate(0, headScale, 0));
-    antennaRotate = new TransformNode("rotate antenna", Mat4Transform.rotateAroundX(0));
+    antennaRotate = new TransformNode("rotate antenna", Mat4Transform.rotateAroundZ(0));
 
     NameNode antennaRod = new NameNode("Antenna rod");
     m = new Mat4(1);
@@ -232,11 +237,11 @@ public class Alien {
 
   private Model makeSphere(GL3 gl, Texture t1, Texture t2) {
     String name= "sphere";
-    Mesh mesh = new Mesh(gl, Sphere.vertices.clone(), Sphere.indices.clone());
+    Mesh mesh = new Mesh(gl, Sphere.vertices, Sphere.indices);
     Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_2t.txt");
     Material material = new Material(new Vec3(1.0f, 0.5f, 0.31f), new Vec3(1.0f, 0.5f, 0.31f), new Vec3(0.5f, 0.5f, 0.5f), 32.0f);
     Mat4 modelMatrix = new Mat4(1);
-    Model sphere = new Model(name, mesh, modelMatrix, shader, material, light, camera, t1, t2);
+    Model sphere = new Model(name, mesh, modelMatrix, shader, material, light1, light2, spotlight, camera, t1, t2);
     return sphere;
   } 
 
@@ -244,45 +249,59 @@ public class Alien {
     alienRoot.draw(gl);
   }
 
-  public void updateAnimation(double elapsedTime) {
-    float rotateAngle = 30f*(float)Math.sin(elapsedTime);
-    headRoll.setTransform(Mat4Transform.rotateAroundZ(-rotateAngle*1.5f));
+  public void resetPosition() {
+    bodyRock.setTransform(Mat4Transform.rotateAroundZ(0));
+    bodyRock.update();
+    leftArmRotate.setTransform(Mat4Transform.rotateAroundX(0));
+    rightArmRotate.setTransform(Mat4Transform.rotateAroundX(0));
+    leftArmRotate.update();
+    rightArmRotate.update();
+    headRoll.setTransform(Mat4Transform.rotateAroundZ(0));
     headRoll.update();
+    leftEarRotate.setTransform(Mat4Transform.rotateAroundX(0));
+    rightEarRotate.setTransform(Mat4Transform.rotateAroundX(0));
+    leftEarRotate.update();
+    rightEarRotate.update();
+    leftEarRotate.setTransform(Mat4Transform.rotateAroundX(0));
+    rightEarRotate.setTransform(Mat4Transform.rotateAroundX(0));
+    leftEarRotate.update();
+    rightEarRotate.update();
+    antennaRotate.setTransform(Mat4Transform.rotateAroundZ(0));
+    antennaRotate.update();
+  }
+
+  public void rockBodyAnimation(double elapsedTime) {
+    float rotateAngle = 30f*(float)Math.sin(elapsedTime);
     bodyRock.setTransform(Mat4Transform.rotateAroundZ(rotateAngle));
     bodyRock.update();
-    leftEarRotate.setTransform(Mat4Transform.rotateAroundX(rotateAngle));
-    leftEarRotate.update();
-    rightEarRotate.setTransform(Mat4Transform.rotateAroundX(rotateAngle));
-    rightEarRotate.update();
-    antennaRotate.setTransform(Mat4Transform.rotateAroundX(-rotateAngle));
-    antennaRotate.update();
-    rotateAngle = 360f*(float)Math.sin(elapsedTime);
+  }
+
+  public void waveArmsAnimation(double elapsedTime) {
+    float rotateAngle = 60f*(float)Math.sin(elapsedTime);
     leftArmRotate.setTransform(Mat4Transform.rotateAroundX(rotateAngle));
+    rightArmRotate.setTransform(Mat4Transform.rotateAroundX(rotateAngle));
     leftArmRotate.update();
-    rightArmRotate.setTransform(Mat4Transform.rotateAroundX(-rotateAngle));
     rightArmRotate.update();
   }
 
-  public void rockHead(double elapsedTime) {
-    bodyRock.setTransform(Mat4Transform.rotateAroundZ(0));
+  public void rollHeadAnimation(double elapsedTime) {
+    float rotateAngle = 30f*(float)Math.sin(elapsedTime);
+    headRoll.setTransform(Mat4Transform.rotateAroundZ(rotateAngle));
+    headRoll.update();
   }
 
-  public void rotateArmsAnimation(double elapsedTime) {
-    leftArmRotate.setTransform(Mat4Transform.rotateAroundX(0));
-    rightArmRotate.setTransform(Mat4Transform.rotateAroundX(0));
+  public void flapEarsAnimation(double elapsedTime) {
+    float rotateAngle = 30f*(float)Math.sin(elapsedTime);
+    leftEarRotate.setTransform(Mat4Transform.rotateAroundX(rotateAngle));
+    rightEarRotate.setTransform(Mat4Transform.rotateAroundX(rotateAngle));
+    leftEarRotate.update();
+    rightEarRotate.update();
   }
 
-  public void rollHead(double elapsedTime) {
-    headRoll.setTransform(Mat4Transform.rotateAroundZ(0));
-  }
-
-  public void rotateEarsAnimation(double elapsedTime) {
-    leftEarRotate.setTransform(Mat4Transform.rotateAroundX(0));
-    rightEarRotate.setTransform(Mat4Transform.rotateAroundX(0));
-  }
-
-  public void rotateAntennaAnimation(double elapsedTime) {
-    antennaRotate.setTransform(Mat4Transform.rotateAroundX(0));
+  public void spinAntennaAnimation(double elapsedTime) {
+    float rotateAngle = 30f*(float)Math.sin(elapsedTime);
+    antennaRotate.setTransform(Mat4Transform.rotateAroundZ(rotateAngle));
+    antennaRotate.update();
   }
 
   public void dispose(GL3 gl) {

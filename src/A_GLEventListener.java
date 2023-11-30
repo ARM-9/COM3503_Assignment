@@ -1,6 +1,14 @@
 import gmaths.*;
 
 import java.nio.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+
 import com.jogamp.common.nio.*;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.util.*;
@@ -36,7 +44,6 @@ public class A_GLEventListener implements GLEventListener {
     gl.glEnable(GL.GL_CULL_FACE); // default is 'not enabled'
     gl.glCullFace(GL.GL_BACK);   // default is 'back', assuming CCW
     initialise(gl);
-    startTime = getSeconds();
   }
   
   /* Called to indicate the drawing surface has been moved and/or resized  */
@@ -56,9 +63,13 @@ public class A_GLEventListener implements GLEventListener {
   /* Clean up memory, if necessary */
   public void dispose(GLAutoDrawable drawable) {
     GL3 gl = drawable.getGL().getGL3();
-    light.dispose(gl);
+    light1.dispose(gl);
+    light2.dispose(gl);
+    spotlight.dispose(gl);
     floor.dispose(gl);
-    alien.dispose(gl);
+    alien1.dispose(gl);
+    alien2.dispose(gl);
+    securitySpotlight.dispose(gl);
   }
   
   
@@ -67,36 +78,62 @@ public class A_GLEventListener implements GLEventListener {
    *
    *
    */
-   
-  private boolean animation = false;
-  private double savedTime = 0;
-   
-  public void startAnimation() {
-    animation = true;
-    startTime = getSeconds()-savedTime;
+  private Map<String, Animation> animations = new HashMap<>();
+
+  private void initialiseAnimations() {
+    // Alien 1
+    animations.put("a1rb", new Animation((et -> alien1.rockBodyAnimation(et))));
+    animations.put("a1rh", new Animation(et -> alien1.rollHeadAnimation(et)));
+    animations.put("a1wa", new Animation(et -> alien1.waveArmsAnimation(et)));
+    animations.put("a1fe", new Animation(et -> alien1.flapEarsAnimation(et)));
+    animations.put("a1sa", new Animation(et -> alien1.spinAntennaAnimation(et)));
+    // Alien 2
+    animations.put("a2rb", new Animation((et -> alien2.rockBodyAnimation(et))));
+    animations.put("a2rh", new Animation(et -> alien2.rollHeadAnimation(et)));
+    animations.put("a2wa", new Animation(et -> alien2.waveArmsAnimation(et)));
+    animations.put("a2fe", new Animation(et -> alien2.flapEarsAnimation(et)));
+    animations.put("a2sa", new Animation(et -> alien2.spinAntennaAnimation(et)));
+    // Spotlight
+    animations.put("sp", new Animation(et -> securitySpotlight.spinAnimation(et)));
   }
-   
-  public void stopAnimation() {
-    animation = false;
-    double elapsedTime = getSeconds()-startTime;
-    savedTime = elapsedTime;
+
+  public void toggleAnimation(String animationKey) {
+    if ( animationKey.equals("sp") ) {
+      spotlight.toggleOnOff();
+    }
+
+    Animation animation = animations.get(animationKey);
+    animation.toggleMoving();
+    if ( animation.getMoving() ) {
+      animation.setStart(getSeconds() - animation.getStop());
+    } else {
+      animation.setStop(getSeconds() - animation.getStart());
+    }
   }
-   
-  public void incXPosition() {
-    
+
+  public void resetAlien1() {
+    animations.get("a1rb").setMoving(false);
+    animations.get("a1rh").setMoving(false);
+    animations.get("a1wa").setMoving(false);
+    animations.get("a1fe").setMoving(false);
+    animations.get("a1sa").setMoving(false);
+    alien1.resetPosition();
   }
-   
-  public void decXPosition() {
-    
+
+  public void resetAlien2() {
+    animations.get("a2rb").setMoving(false);
+    animations.get("a2rh").setMoving(false);
+    animations.get("a2wa").setMoving(false);
+    animations.get("a2fe").setMoving(false);
+    animations.get("a2sa").setMoving(false);
+    alien2.resetPosition();
   }
-  
-  public void loweredArms() {
-    
+
+  public void toggleGlobalLights() {
+    light1.toggleOnOff();
+    light2.toggleOnOff();
   }
-   
-  public void raisedArms() {
-    
-  }
+
   
   // ***************************************************
   /* THE SCENE
@@ -110,9 +147,13 @@ public class A_GLEventListener implements GLEventListener {
   private Camera camera;
   private Mat4 perspective;
   private Model floor;
-  private Light light;
+  private Light light1;
+  private Light light2;
+  private Light spotlight;
   
-  private Alien alien;
+  private Alien alien1;
+  private Alien alien2;
+  private SecuritySpotlight securitySpotlight;
 
   private void initialise(GL3 gl) {
     createRandomNumbers();
@@ -121,8 +162,21 @@ public class A_GLEventListener implements GLEventListener {
     textures.add(gl, "jade_diffuse", "textures/jade.jpg");
     textures.add(gl, "jade_specular", "textures/jade_specular.jpg");
     
-    light = new Light(gl);
-    light.setCamera(camera);
+    light1 = new Light(gl);
+    light1.setPosition(5, 10, -5);
+    light1.setCamera(camera);
+
+    light2 = new Light(gl);
+    light2.setPosition(-5, 10, 5);
+    light2.setCamera(camera);
+
+    toggleGlobalLights(); // Turning on global lights so scene isn't pitch black
+
+    spotlight = new Light(gl);
+    spotlight.setPosition(new Vec3(0, 5, 0));
+    spotlight.setDirection(new Vec3(0, -1, 0));
+    spotlight.setCutoff((float)Math.cos(Math.toRadians(60)));
+    spotlight.setCamera(camera);
     
     // floor
     String name = "floor";
@@ -130,43 +184,44 @@ public class A_GLEventListener implements GLEventListener {
     Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_2t.txt");
     Material material = new Material(new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.3f, 0.3f, 0.3f), 32.0f);
     Mat4 modelMatrix = Mat4Transform.scale(16,1f,16);
-    floor = new Model(name, mesh, modelMatrix, shader, material, light, camera, textures.get("jade_diffuse"), textures.get("jade_specular"));
+    floor = new Model(name, mesh, modelMatrix, shader, material, light1, light2, spotlight, camera, textures.get("jade_diffuse"), textures.get("jade_specular"));
     
-    alien = new Alien(gl, camera, light, 
-                      textures.get("jade_diffuse"), textures.get("jade_specular")
-                      ); 
+    alien1 = new Alien(gl, camera, light1, light2, spotlight,
+                      textures.get("jade_diffuse"), textures.get("jade_specular"),
+                      -3.5f);
+    
+    alien2 = new Alien(gl, camera, light1, light2, spotlight,
+                      textures.get("jade_diffuse"), textures.get("jade_specular"),
+                      3.5f);
+    
+    securitySpotlight = new SecuritySpotlight(gl, camera, light1, light2, spotlight,
+                                   textures.get("jade_diffuse"), textures.get("jade_specular"),
+                                  new Vec3(0, 0, -2));
+    
+    initialiseAnimations();
   }
  
   private void render(GL3 gl) {
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-    light.setPosition(getLightPosition());  // changing light position each frame
-    light.render(gl);
-    floor.render(gl); 
-    if (animation) {
-      double elapsedTime = getSeconds()-startTime;
-      alien.updateAnimation(elapsedTime);
+    light1.render(gl);
+    light2.render(gl);
+    spotlight.render(gl);
+    floor.render(gl);
+
+    for (Animation a : animations.values()) {
+      if ( a.getMoving() ) {
+        a.getMovement().accept(getSeconds() - a.getStart());
+      }
     }
-    alien.render(gl);
-  }
 
-  
-  
-  // The light's postion is continually being changed, so needs to be calculated for each frame.
-  private Vec3 getLightPosition() {
-    double elapsedTime = getSeconds()-startTime;
-    float x = 5.0f*(float)(Math.sin(Math.toRadians(elapsedTime*50)));
-    float y = 2.7f;
-    float z = 5.0f*(float)(Math.cos(Math.toRadians(elapsedTime*50)));
-    return new Vec3(x,y,z);   
-    //return new Vec3(5f,3.4f,5f);
+    alien1.render(gl);
+    alien2.render(gl);
+    securitySpotlight.render(gl);
   }
-
   
   // ***************************************************
   /* TIME
    */ 
-  
-  private double startTime;
   
   private double getSeconds() {
     return System.currentTimeMillis()/1000.0;

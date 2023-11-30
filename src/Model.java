@@ -14,7 +14,9 @@ public class Model {
   private Shader shader;
   private Material material;
   private Camera camera;
-  private Light light;
+  private Light firstLight;
+  private Light secondLight;
+  private Light spotlight;
   private Texture diffuse;
   private Texture specular;
 
@@ -24,28 +26,32 @@ public class Model {
     modelMatrix = null;
     material = null;
     camera = null;
-    light = null;
+    firstLight = null;
+    secondLight = null;
+    spotlight = null;
     shader = null;
   }
   
-  public Model(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Light light, Camera camera, Texture diffuse, Texture specular) {
+  public Model(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Light firstLight, Light secondLight, Light spotlight, Camera camera, Texture diffuse, Texture specular) {
     this.name = name;
     this.mesh = mesh;
     this.modelMatrix = modelMatrix;
     this.shader = shader;
     this.material = material;
-    this.light = light;
+    this.firstLight = firstLight;
+    this.secondLight = secondLight;
+    this.spotlight = spotlight;
     this.camera = camera;
     this.diffuse = diffuse;
     this.specular = specular;
   }
   
-  public Model(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Light light, Camera camera, Texture diffuse) {
-    this(name, mesh, modelMatrix, shader, material, light, camera, diffuse, null);
+  public Model(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Light firstLight, Light secondLight, Light spotlight, Camera camera, Texture diffuse) {
+    this(name, mesh, modelMatrix, shader, material, firstLight, secondLight, spotlight, camera, diffuse, null);
   }
   
-  public Model(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Light light, Camera camera) {
-    this(name, mesh, modelMatrix, shader, material, light, camera, null, null);
+  public Model(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Light firstLight, Light secondLight, Light spotlight, Camera camera) {
+    this(name, mesh, modelMatrix, shader, material, firstLight, secondLight, spotlight, camera, null, null);
   }
 
   public void setName(String s) {
@@ -72,8 +78,16 @@ public class Model {
     this.camera = camera;
   }
   
-  public void setLight(Light light) {
-    this.light = light;
+  public void setFirstLight(Light light) {
+    this.firstLight = light;
+  }
+
+  public void setSecondLight(Light light) {
+    this.secondLight = light;
+  }
+  
+  public void setSpotlight(Light light) {
+    this.spotlight = light;
   }
 
   public void setDiffuse(Texture t) {
@@ -110,10 +124,22 @@ public class Model {
     
     shader.setVec3(gl, "viewPos", camera.getPosition());
 
-    shader.setVec3(gl, "light.position", light.getPosition());
-    shader.setVec3(gl, "light.ambient", light.getMaterial().getAmbient());
-    shader.setVec3(gl, "light.diffuse", light.getMaterial().getDiffuse());
-    shader.setVec3(gl, "light.specular", light.getMaterial().getSpecular());
+    shader.setVec3(gl, "first_light.position", firstLight.getPosition());
+    shader.setVec3(gl, "first_light.ambient", firstLight.getMaterial().getAmbient());
+    shader.setVec3(gl, "first_light.diffuse", firstLight.getMaterial().getDiffuse());
+    shader.setVec3(gl, "first_light.specular", firstLight.getMaterial().getSpecular());
+
+    shader.setVec3(gl, "second_light.position", secondLight.getPosition());
+    shader.setVec3(gl, "second_light.ambient", secondLight.getMaterial().getAmbient());
+    shader.setVec3(gl, "second_light.diffuse", secondLight.getMaterial().getDiffuse());
+    shader.setVec3(gl, "second_light.specular", secondLight.getMaterial().getSpecular());
+
+    shader.setVec3(gl, "spotlight.light.position", spotlight.getPosition());
+    shader.setVec3(gl, "spotlight.light.ambient", spotlight.getMaterial().getAmbient());
+    shader.setVec3(gl, "spotlight.light.diffuse", spotlight.getMaterial().getDiffuse());
+    shader.setVec3(gl, "spotlight.light.specular", spotlight.getMaterial().getSpecular());
+    shader.setVec3(gl, "spotlight.direction", spotlight.getDirection());
+    shader.setFloat(gl, "spotlight.cutoff", spotlight.getCutoff());
 
     shader.setVec3(gl, "material.ambient", material.getAmbient());
     shader.setVec3(gl, "material.diffuse", material.getDiffuse());

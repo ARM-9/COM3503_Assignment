@@ -1,3 +1,9 @@
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.util.texture.Texture;
+
+import gmaths.Mat4;
+import gmaths.Vec3;
+
 public final class Sphere {
   
   // ***************************************************

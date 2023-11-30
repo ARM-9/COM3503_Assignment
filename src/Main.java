@@ -43,28 +43,47 @@ public class Main extends JFrame implements ActionListener {
     menuBar.add(fileMenu);
     
     JPanel p = new JPanel();
-      JButton b = new JButton("camera X");
+    p.setLayout(new GridLayout(3, 5));
+      JButton b = new JButton("Rock body alien 1");
       b.addActionListener(this);
       p.add(b);
-      b = new JButton("camera Z");
+      b = new JButton("Roll head alien 1");
       b.addActionListener(this);
       p.add(b);
-      b = new JButton("start");
+      b = new JButton("Wave arms alien 1");
       b.addActionListener(this);
       p.add(b);
-      b = new JButton("stop");
+      b = new JButton("Flap ears alien 1");
       b.addActionListener(this);
       p.add(b);
-      b = new JButton("increase X position");
+      b = new JButton("Spin antenna alien 1");
       b.addActionListener(this);
       p.add(b);
-      b = new JButton("decrease X position");
+      b = new JButton("Rock body alien 2");
       b.addActionListener(this);
       p.add(b);
-      b = new JButton("lowered arms");
+      b = new JButton("Roll head alien 2");
       b.addActionListener(this);
       p.add(b);
-      b = new JButton("raised arms");
+      b = new JButton("Wave arms alien 2");
+      b.addActionListener(this);
+      p.add(b);
+      b = new JButton("Flap ears alien 2");
+      b.addActionListener(this);
+      p.add(b);
+      b = new JButton("Spin antenna alien 2");
+      b.addActionListener(this);
+      p.add(b);
+      b = new JButton("Reset alien 1");
+      b.addActionListener(this);
+      p.add(b);
+      b = new JButton("Reset alien 2");
+      b.addActionListener(this);
+      p.add(b);
+      b = new JButton("Spotlight");
+      b.addActionListener(this);
+      p.add(b);
+      b = new JButton("Global lights");
       b.addActionListener(this);
       p.add(b);
     this.add(p, BorderLayout.SOUTH);
@@ -82,31 +101,47 @@ public class Main extends JFrame implements ActionListener {
   }
   
   public void actionPerformed(ActionEvent e) {
-    if (e.getActionCommand().equalsIgnoreCase("camera X")) {
-      camera.setCamera(Camera.CameraType.X);
-      canvas.requestFocusInWindow();
+    if (e.getActionCommand().equalsIgnoreCase("Rock body alien 1")) {
+      glEventListener.toggleAnimation("a1rb");
     }
-    else if (e.getActionCommand().equalsIgnoreCase("camera Z")) {
-      camera.setCamera(Camera.CameraType.Z);
-      canvas.requestFocusInWindow();
+    else if (e.getActionCommand().equalsIgnoreCase("Roll head alien 1")) {
+      glEventListener.toggleAnimation("a1rh");
     }
-    else if (e.getActionCommand().equalsIgnoreCase("start")) {
-      glEventListener.startAnimation();
+    else if (e.getActionCommand().equalsIgnoreCase("Wave arms alien 1")) {
+      glEventListener.toggleAnimation("a1wa");
     }
-    else if (e.getActionCommand().equalsIgnoreCase("stop")) {
-      glEventListener.stopAnimation();
+    else if (e.getActionCommand().equalsIgnoreCase("Flap ears alien 1")) {
+      glEventListener.toggleAnimation("a1fe");
     }
-    else if (e.getActionCommand().equalsIgnoreCase("increase X position")) {
-      glEventListener.incXPosition();
+    else if (e.getActionCommand().equalsIgnoreCase("Spin antenna alien 1")) {
+      glEventListener.toggleAnimation("a1sa");
     }
-    else if (e.getActionCommand().equalsIgnoreCase("decrease X position")) {
-      glEventListener.decXPosition();
+    else if (e.getActionCommand().equalsIgnoreCase("Rock body alien 2")) {
+      glEventListener.toggleAnimation("a2rb");
     }
-    else if (e.getActionCommand().equalsIgnoreCase("lowered arms")) {
-      glEventListener.loweredArms();
+    else if (e.getActionCommand().equalsIgnoreCase("Roll head alien 2")) {
+      glEventListener.toggleAnimation("a2rh");
     }
-    else if (e.getActionCommand().equalsIgnoreCase("raised arms")) {
-      glEventListener.raisedArms();
+    else if (e.getActionCommand().equalsIgnoreCase("Wave arms alien 2")) {
+      glEventListener.toggleAnimation("a2wa");
+    }
+    else if (e.getActionCommand().equalsIgnoreCase("Flap ears alien 2")) {
+      glEventListener.toggleAnimation("a2fe");
+    }
+    else if (e.getActionCommand().equalsIgnoreCase("Spin antenna alien 2")) {
+      glEventListener.toggleAnimation("a2sa");
+    }
+    else if (e.getActionCommand().equalsIgnoreCase("Reset alien 1")) {
+      glEventListener.resetAlien1();
+    }
+    else if (e.getActionCommand().equalsIgnoreCase("Reset alien 2")) {
+      glEventListener.resetAlien2();
+    }
+    else if (e.getActionCommand().equalsIgnoreCase("Spotlight")) {
+      glEventListener.toggleAnimation("sp");
+    }
+    else if (e.getActionCommand().equalsIgnoreCase("Global lights")) {
+      glEventListener.toggleGlobalLights();
     }
     else if(e.getActionCommand().equalsIgnoreCase("quit"))
       System.exit(0);
