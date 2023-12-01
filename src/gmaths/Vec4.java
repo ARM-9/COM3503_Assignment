@@ -24,6 +24,10 @@ public final class Vec4 {
     this.z = z;
     this.w = w;
   }
+
+  public static float dotProduct(Vec4 a, Vec4 b) {
+    return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;
+  }
       
   public Vec3 toVec3() {
     return new Vec3(x,y,z);

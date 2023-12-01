@@ -21,6 +21,12 @@ public final class Vec3 {
     this.z = v.z;
   }
 
+  public Vec3(Vec4 v) {
+    this.x = v.x;
+    this.y = v.y;
+    this.z = v.z;
+  }
+
   public float length() {
     return magnitude();
   }

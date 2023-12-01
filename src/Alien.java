@@ -13,11 +13,11 @@ import com.jogamp.opengl.util.texture.*;
 public class Alien {
 
   private Camera camera;
-  private Light light1;
-  private Light light2;
-  private Light spotlight;
+  private LightModel light1;
+  private LightModel light2;
+  private LightModel spotlight;
 
-  private Model sphere;
+  private ObjectModel sphere;
 
   private SGNode alienRoot;
   private TransformNode bodyRock, headRoll;
@@ -25,7 +25,7 @@ public class Alien {
   private TransformNode leftEarRotate, rightEarRotate;
   private TransformNode antennaRotate;
    
-  public Alien(GL3 gl, Camera camera, Light light1, Light light2, Light spotlight, Texture t1, Texture t2, float xPos) {
+  public Alien(GL3 gl, Camera camera, LightModel light1, LightModel light2, LightModel spotlight, Texture t1, Texture t2, float xPos) {
     // TODO: Add a litt of textures as a parameter
     // Textures with specular maps may be part of a pair list
     // and singles may be part of another list
@@ -235,15 +235,15 @@ public class Alien {
 
   }
 
-  private Model makeSphere(GL3 gl, Texture t1, Texture t2) {
+  private ObjectModel makeSphere(GL3 gl, Texture t1, Texture t2) {
     String name= "sphere";
     Mesh mesh = new Mesh(gl, Sphere.vertices, Sphere.indices);
     Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_2t.txt");
     Material material = new Material(new Vec3(1.0f, 0.5f, 0.31f), new Vec3(1.0f, 0.5f, 0.31f), new Vec3(0.5f, 0.5f, 0.5f), 32.0f);
     Mat4 modelMatrix = new Mat4(1);
-    Model sphere = new Model(name, mesh, modelMatrix, shader, material, light1, light2, spotlight, camera, t1, t2);
+    ObjectModel sphere = new ObjectModel(name, mesh, modelMatrix, shader, material, light1, light2, spotlight, camera, t1, t2);
     return sphere;
-  } 
+  }
 
   public void render(GL3 gl) {
     alienRoot.draw(gl);

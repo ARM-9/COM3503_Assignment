@@ -1,22 +1,8 @@
 import gmaths.*;
 
-import java.nio.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-
-import com.jogamp.common.nio.*;
 import com.jogamp.opengl.*;
-import com.jogamp.opengl.util.*;
-import com.jogamp.opengl.util.awt.*;
-import com.jogamp.opengl.util.glsl.*;
-import com.jogamp.opengl.util.texture.*;
-import com.jogamp.opengl.util.texture.awt.*;
-import com.jogamp.opengl.util.texture.spi.JPEGImage;
   
 public class A_GLEventListener implements GLEventListener {
   
@@ -65,7 +51,6 @@ public class A_GLEventListener implements GLEventListener {
     GL3 gl = drawable.getGL().getGL3();
     light1.dispose(gl);
     light2.dispose(gl);
-    spotlight.dispose(gl);
     floor.dispose(gl);
     alien1.dispose(gl);
     alien2.dispose(gl);
@@ -99,7 +84,7 @@ public class A_GLEventListener implements GLEventListener {
 
   public void toggleAnimation(String animationKey) {
     if ( animationKey.equals("sp") ) {
-      spotlight.toggleOnOff();
+      securitySpotlight.getSpotlight().toggleOnOff();
     }
 
     Animation animation = animations.get(animationKey);
@@ -130,8 +115,8 @@ public class A_GLEventListener implements GLEventListener {
   }
 
   public void toggleGlobalLights() {
-    light1.toggleOnOff();
-    light2.toggleOnOff();
+    light1.getLightModel().toggleOnOff();
+    light2.getLightModel().toggleOnOff();
   }
 
   
@@ -146,13 +131,12 @@ public class A_GLEventListener implements GLEventListener {
 
   private Camera camera;
   private Mat4 perspective;
-  private Model floor;
-  private Light light1;
-  private Light light2;
-  private Light spotlight;
+  private ObjectModel floor;
   
   private Alien alien1;
   private Alien alien2;
+  private GlobalLight light1;
+  private GlobalLight light2;
   private SecuritySpotlight securitySpotlight;
 
   private void initialise(GL3 gl) {
@@ -161,42 +145,31 @@ public class A_GLEventListener implements GLEventListener {
     textures = new TextureLibrary();
     textures.add(gl, "jade_diffuse", "textures/jade.jpg");
     textures.add(gl, "jade_specular", "textures/jade_specular.jpg");
-    
-    light1 = new Light(gl);
-    light1.setPosition(5, 10, -5);
-    light1.setCamera(camera);
 
-    light2 = new Light(gl);
-    light2.setPosition(-5, 10, 5);
-    light2.setCamera(camera);
+    light1 = new GlobalLight(gl, camera, new Vec3(5, 10, 5));
+    light2 = new GlobalLight(gl, camera, new Vec3(-5, 10, 5));
 
     toggleGlobalLights(); // Turning on global lights so scene isn't pitch black
-
-    spotlight = new Light(gl);
-    spotlight.setPosition(new Vec3(0, 5, 0));
-    spotlight.setDirection(new Vec3(0, -1, 0));
-    spotlight.setCutoff((float)Math.cos(Math.toRadians(60)));
-    spotlight.setCamera(camera);
     
+    securitySpotlight = new SecuritySpotlight(gl, camera, light1.getLightModel(), light2.getLightModel(),
+                                   textures.get("jade_diffuse"), textures.get("jade_specular"),
+                                  new Vec3(0, 0, -2));
+
     // floor
     String name = "floor";
     Mesh mesh = new Mesh(gl, TwoTriangles.vertices.clone(), TwoTriangles.indices.clone());
     Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_2t.txt");
     Material material = new Material(new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.3f, 0.3f, 0.3f), 32.0f);
     Mat4 modelMatrix = Mat4Transform.scale(16,1f,16);
-    floor = new Model(name, mesh, modelMatrix, shader, material, light1, light2, spotlight, camera, textures.get("jade_diffuse"), textures.get("jade_specular"));
+    floor = new ObjectModel(name, mesh, modelMatrix, shader, material, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getSpotlight(), camera, textures.get("jade_diffuse"), textures.get("jade_specular"));
     
-    alien1 = new Alien(gl, camera, light1, light2, spotlight,
+    alien1 = new Alien(gl, camera, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getSpotlight(),
                       textures.get("jade_diffuse"), textures.get("jade_specular"),
                       -3.5f);
     
-    alien2 = new Alien(gl, camera, light1, light2, spotlight,
+    alien2 = new Alien(gl, camera, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getSpotlight(),
                       textures.get("jade_diffuse"), textures.get("jade_specular"),
                       3.5f);
-    
-    securitySpotlight = new SecuritySpotlight(gl, camera, light1, light2, spotlight,
-                                   textures.get("jade_diffuse"), textures.get("jade_specular"),
-                                  new Vec3(0, 0, -2));
     
     initialiseAnimations();
   }
@@ -205,7 +178,6 @@ public class A_GLEventListener implements GLEventListener {
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
     light1.render(gl);
     light2.render(gl);
-    spotlight.render(gl);
     floor.render(gl);
 
     for (Animation a : animations.values()) {

@@ -1,31 +1,34 @@
 import gmaths.*;
-import java.nio.*;
-import com.jogamp.common.nio.*;
 import com.jogamp.opengl.*;
   
-public class Light {
-  
+public class LightModel extends Model {
+
+  private String name;
+  private Mesh mesh;
+  private Mat4 modelMatrix;
+  private Shader shader;
   private Material material;
+  private Camera camera;
   private Vec3 position;
   private Vec3 direction;
   private float cutoff;
-  private Mesh mesh;
-  private Shader shader;
-  private Camera camera;
   private boolean on = true;
     
-  public Light(GL3 gl) {
-    this(gl, new Vec3(0, 0, 0), 0);
+  public LightModel(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Camera camera) {
+    this(name, mesh, modelMatrix, shader, material, camera, new Vec3(0, 0, 0), 0);
   }
 
-  public Light(GL3 gl, Vec3 direction, float cutoff) {
-    material = new Material();
+  public LightModel(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Camera camera, Vec3 direction, float cutoff) {
+    this.name = name;
+    this.mesh = mesh;
+    this.modelMatrix = modelMatrix;
+    this.shader = shader;
+    this.material = material;
+    this.camera = camera;
     toggleOnOff(); // Turn lights off and set A/D/S values
-    position = new Vec3(3f,2f,1f);
-    this.direction = direction;
+    position = new Vec3(3f,2f,1f); // Calculate positions
+    this.direction = direction; // Calculate direction
     this.cutoff = cutoff;
-    mesh = new Mesh(gl, Sphere.vertices.clone(), Sphere.indices.clone());
-    shader = new Shader(gl, "shaders/vs_light_01.txt", "shaders/fs_light_01.txt");
   }
   
   public void setPosition(Vec3 v) {
@@ -44,6 +47,32 @@ public class Light {
     return position;
   }
 
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+  public void setMesh(Mesh mesh) {
+    this.mesh = mesh;
+  }
+
+  public Mat4 getModelMatrix() {
+    return this.modelMatrix;
+  }
+
+  public void setModelMatrix(Mat4 modelMatrix) {
+    this.modelMatrix = modelMatrix;
+  }
+  public void setShader(Shader shader) {
+    this.shader = shader;
+  }
+
+  public Camera getCamera() {
+    return this.camera;
+  }
+
   public void setDirection(Vec3 dir) {
     direction = dir;
   }
@@ -58,6 +87,14 @@ public class Light {
   
   public float getCutoff() {
     return cutoff;
+  }
+
+  public Mesh getMesh() {
+    return mesh;
+  }
+
+  public Shader getShader() {
+    return shader;
   }
   
   public void setMaterial(Material m) {
@@ -87,11 +124,11 @@ public class Light {
   }
   
   public void render(GL3 gl) {
-    Mat4 model = new Mat4(1);
-    model = Mat4.multiply(Mat4Transform.scale(0.3f,0.3f,0.3f), model);
-    model = Mat4.multiply(Mat4Transform.translate(position), model);
-    
-    Mat4 mvpMatrix = Mat4.multiply(camera.getPerspectiveMatrix(), Mat4.multiply(camera.getViewMatrix(), model));
+    render(gl, modelMatrix);
+  }
+
+  public void render(GL3 gl, Mat4 modelMatrix) {
+    Mat4 mvpMatrix = Mat4.multiply(camera.getPerspectiveMatrix(), Mat4.multiply(camera.getViewMatrix(), modelMatrix));
     
     shader.use(gl);
     shader.setFloatArray(gl, "mvpMatrix", mvpMatrix.toFloatArrayForGLSL());

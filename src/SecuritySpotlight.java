@@ -13,20 +13,21 @@ import com.jogamp.opengl.util.texture.*;
 public class SecuritySpotlight {
 
   private Camera camera;
-  private Light light1;
-  private Light light2;
-  private Light spotlight;
+  private LightModel light1;
+  private LightModel light2;
+  private LightModel spotlight;
 
-  private Model sphere;
+  private ObjectModel sphere;
 
   private SGNode spotlightRoot;
   private TransformNode headSpin;
+  private Mat4 lightPositionTranslate;
    
-  public SecuritySpotlight(GL3 gl, Camera camera, Light light1, Light light2, Light spotlight, Texture t1, Texture t2, Vec3 pos) {
+  public SecuritySpotlight(GL3 gl, Camera camera, LightModel light1, LightModel light2, Texture t1, Texture t2, Vec3 pos) {
     this.camera = camera;
     this.light1 = light1;
     this.light2 = light2;
-    this.spotlight = spotlight;
+    this.spotlight = makeLightbulb(gl);
 
     sphere = makeSphere(gl, t1,t2);
     
@@ -56,9 +57,13 @@ public class SecuritySpotlight {
 
     // Head
 
-    TransformNode wholeHeadTranslate = new TransformNode("position whole head", Mat4Transform.translate(0, poleLength, 0));
+    m = Mat4Transform.translate(0, poleLength, 0);
+    TransformNode wholeHeadTranslate = new TransformNode("position whole head", m);
+    lightPositionTranslate = m;
     headSpin = new TransformNode("spin head", Mat4Transform.rotateAroundY(0));
-    TransformNode tiltHead = new TransformNode("tilt head", Mat4Transform.rotateAroundX(headTiltAngle));
+    m = Mat4Transform.rotateAroundX(headTiltAngle);
+    TransformNode tiltHead = new TransformNode("tilt head", m);
+    lightPositionTranslate = Mat4.multiply(lightPositionTranslate, m);
 
     NameNode head = new NameNode("head");
     m = new Mat4(1);
@@ -69,14 +74,15 @@ public class SecuritySpotlight {
 
     m = Mat4Transform.translate(0, 0, headLength/2);
     TransformNode lightTranslate = new TransformNode("position light", m);
+    lightPositionTranslate = Mat4.multiply(lightPositionTranslate, m);
     
     NameNode light = new NameNode("light");
     m = new Mat4(1);
     m = Mat4.multiply(m, Mat4Transform.translate(0, headWidth/2, 0));
+    lightPositionTranslate = Mat4.multiply(lightPositionTranslate, m);
     m = Mat4.multiply(m, Mat4Transform.scale(lightScale));
-    //m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
     TransformNode lightTransform = new TransformNode("light transform", m);
-    ModelNode lightShape = new ModelNode("Sphere(light)", sphere);
+    ModelNode lightShape = new ModelNode("Sphere(light)", spotlight);
 
     // Scene graph hierarchy
     spotlightRoot.addChild(spotlightTranslate);
@@ -94,19 +100,35 @@ public class SecuritySpotlight {
         light.addChild(lightTransform);
         lightTransform.addChild(lightShape);
     
+    spotlight.setPosition(new Vec3(Mat4.multiply(lightPositionTranslate, new Vec4())));
+    
     spotlightRoot.update();  // IMPORTANT - don't forget this
 
   }
 
-  private Model makeSphere(GL3 gl, Texture t1, Texture t2) {
+  public LightModel getSpotlight() {
+    return spotlight;
+  }
+
+  private ObjectModel makeSphere(GL3 gl, Texture t1, Texture t2) {
     String name= "sphere";
     Mesh mesh = new Mesh(gl, Sphere.vertices, Sphere.indices);
     Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_2t.txt");
     Material material = new Material(new Vec3(1.0f, 0.5f, 0.31f), new Vec3(1.0f, 0.5f, 0.31f), new Vec3(0.5f, 0.5f, 0.5f), 32.0f);
     Mat4 modelMatrix = new Mat4(1);
-    Model sphere = new Model(name, mesh, modelMatrix, shader, material, light1, light2, spotlight, camera, t1, t2);
+    ObjectModel sphere = new ObjectModel(name, mesh, modelMatrix, shader, material, light1, light2, spotlight, camera, t1, t2);
     return sphere;
-  } 
+  }
+
+  private LightModel makeLightbulb(GL3 gl) {
+    String name = "sphere";
+    Mesh mesh = new Mesh(gl, Sphere.vertices, Sphere.indices);
+    Shader shader = new Shader(gl, "shaders/vs_light_01.txt", "shaders/fs_light_01.txt");
+    Material material = new Material();
+    Mat4 modelMatrix = new Mat4(1.0f);
+    LightModel sphere = new LightModel(name, mesh, modelMatrix, shader, material, camera, new Vec3(0, -1, 0), (float)Math.cos(Math.toRadians(30)));
+    return sphere;
+  }
 
   public void render(GL3 gl) {
     spotlightRoot.draw(gl);
@@ -114,7 +136,10 @@ public class SecuritySpotlight {
 
   public void spinAnimation(double elapsedTime) {
     float rotateAngle = 180 * (float)Math.sin(elapsedTime);
-    headSpin.setTransform(Mat4Transform.rotateAroundY(rotateAngle));
+    Mat4 m = Mat4Transform.rotateAroundY(rotateAngle);
+    headSpin.setTransform(m);
+    spotlight.setPosition(new Vec3(Mat4.multiply(Mat4.multiply(lightPositionTranslate, m), new Vec4(spotlight.getPosition()))));
+    System.out.println(new Vec3(Mat4.multiply(Mat4.multiply(lightPositionTranslate, m), new Vec4(spotlight.getPosition()))).toString()); // MULTIPLES INTO INCREASINGLY LARGE NUMBERS 
     headSpin.update();
   }
 
