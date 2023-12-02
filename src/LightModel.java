@@ -10,15 +10,16 @@ public class LightModel extends Model {
   private Material material;
   private Camera camera;
   private Vec3 position;
-  private Vec3 direction;
+  private Vec3 directionPoint;
+  private float direction; // Angle from centre that the spotlight is pointing in
   private float cutoff;
   private boolean on = true;
     
   public LightModel(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Camera camera) {
-    this(name, mesh, modelMatrix, shader, material, camera, new Vec3(0, 0, 0), 0);
+    this(name, mesh, modelMatrix, shader, material, camera, 0, 0);
   }
 
-  public LightModel(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Camera camera, Vec3 direction, float cutoff) {
+  public LightModel(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Camera camera, float direction, float cutoff) {
     this.name = name;
     this.mesh = mesh;
     this.modelMatrix = modelMatrix;
@@ -27,8 +28,8 @@ public class LightModel extends Model {
     this.camera = camera;
     toggleOnOff(); // Turn lights off and set A/D/S values
     position = new Vec3(3f,2f,1f); // Calculate positions
-    this.direction = direction; // Calculate direction
     this.cutoff = cutoff;
+    this.direction = direction;
   }
   
   public void setPosition(Vec3 v) {
@@ -73,11 +74,19 @@ public class LightModel extends Model {
     return this.camera;
   }
 
-  public void setDirection(Vec3 dir) {
+  public void setDirectionPoint(Vec3 dirPoint) {
+    this.directionPoint = dirPoint;
+  }
+
+  public Vec3 getDirectionPoint() {
+    return directionPoint;
+  }
+
+  public void setDirection(float dir) {
     direction = dir;
   }
 
-  public Vec3 getDirection() {
+  public float getDirection() {
     return direction;
   }
 

@@ -56,6 +56,7 @@ vec3 CalcPointlight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 vec3 CalcSpotLight(Spotlight spotlight, vec3 normal, vec3 fragPos, vec3 viewDir) {
   Light light = spotlight.light;
   vec3 lightDir = normalize(light.position - fragPos);
+  vec3 spotlightDir = normalize(spotlight.direction - light.position);
 
   // ambient
   vec3 ambient = light.ambient * vec3(texture(first_texture, aTexCoord));
@@ -67,7 +68,7 @@ vec3 CalcSpotLight(Spotlight spotlight, vec3 normal, vec3 fragPos, vec3 viewDir)
   float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
   vec3 specular = light.specular * spec * vec3(texture(second_texture, aTexCoord));
 
-  float theta = dot(lightDir, normalize(-spotlight.direction));
+  float theta = dot(lightDir, -spotlightDir);
   if (theta < spotlight.cutoff) {
     return ambient;
   }

@@ -20,6 +20,7 @@ public class SecuritySpotlight {
   private ObjectModel sphere;
 
   private SGNode spotlightRoot;
+  private TransformNode wholeHeadTranslate;
   private TransformNode headSpin;
   private Mat4 lightPositionTranslate;
    
@@ -57,13 +58,12 @@ public class SecuritySpotlight {
 
     // Head
 
-    m = Mat4Transform.translate(0, poleLength, 0);
-    TransformNode wholeHeadTranslate = new TransformNode("position whole head", m);
-    lightPositionTranslate = m;
+    
+    wholeHeadTranslate = new TransformNode("position whole head", Mat4Transform.translate(0, poleLength, 0));
     headSpin = new TransformNode("spin head", Mat4Transform.rotateAroundY(0));
     m = Mat4Transform.rotateAroundX(headTiltAngle);
     TransformNode tiltHead = new TransformNode("tilt head", m);
-    lightPositionTranslate = Mat4.multiply(lightPositionTranslate, m);
+    lightPositionTranslate = m;
 
     NameNode head = new NameNode("head");
     m = new Mat4(1);
@@ -101,6 +101,8 @@ public class SecuritySpotlight {
         lightTransform.addChild(lightShape);
     
     spotlight.setPosition(new Vec3(Mat4.multiply(lightPositionTranslate, new Vec4())));
+    Mat4 positionDir = Mat4Transform.translate(0, -1, (float)Math.tan(Math.toRadians(spotlight.getDirection())));
+    spotlight.setDirectionPoint(new Vec3(Mat4.multiply(Mat4.multiply(positionDir, lightPositionTranslate), new Vec4())));
     
     spotlightRoot.update();  // IMPORTANT - don't forget this
 
@@ -126,7 +128,7 @@ public class SecuritySpotlight {
     Shader shader = new Shader(gl, "shaders/vs_light_01.txt", "shaders/fs_light_01.txt");
     Material material = new Material();
     Mat4 modelMatrix = new Mat4(1.0f);
-    LightModel sphere = new LightModel(name, mesh, modelMatrix, shader, material, camera, new Vec3(0, -1, 0), (float)Math.cos(Math.toRadians(30)));
+    LightModel sphere = new LightModel(name, mesh, modelMatrix, shader, material, camera, 15, (float)Math.cos(Math.toRadians(30)));
     return sphere;
   }
 
@@ -137,9 +139,14 @@ public class SecuritySpotlight {
   public void spinAnimation(double elapsedTime) {
     float rotateAngle = 180 * (float)Math.sin(elapsedTime);
     Mat4 m = Mat4Transform.rotateAroundY(rotateAngle);
+    Mat4 positionDir = Mat4Transform.translate(0, -1, (float)Math.tan(Math.toRadians(spotlight.getDirection())));
+    spotlight.setDirectionPoint(new Vec3(Mat4.multiply(Mat4.multiply(Mat4.multiply(wholeHeadTranslate.getTransform(), Mat4.multiply(m, positionDir)), lightPositionTranslate), new Vec4())));
+    System.out.println(spotlight.getDirectionPoint());
+    // Refactor
+    Mat4 lightPosTrans = Mat4.multiply(Mat4.multiply(wholeHeadTranslate.getTransform(), m), lightPositionTranslate);
+
     headSpin.setTransform(m);
-    spotlight.setPosition(new Vec3(Mat4.multiply(Mat4.multiply(lightPositionTranslate, m), new Vec4(spotlight.getPosition()))));
-    System.out.println(new Vec3(Mat4.multiply(Mat4.multiply(lightPositionTranslate, m), new Vec4(spotlight.getPosition()))).toString()); // MULTIPLES INTO INCREASINGLY LARGE NUMBERS 
+    spotlight.setPosition(new Vec3(Mat4.multiply(lightPosTrans, new Vec4())));
     headSpin.update();
   }
 

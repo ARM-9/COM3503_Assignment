@@ -134,7 +134,7 @@ public class ObjectModel extends Model {
     shader.setVec3(gl, "spotlight.light.ambient", spotlight.getMaterial().getAmbient());
     shader.setVec3(gl, "spotlight.light.diffuse", spotlight.getMaterial().getDiffuse());
     shader.setVec3(gl, "spotlight.light.specular", spotlight.getMaterial().getSpecular());
-    shader.setVec3(gl, "spotlight.direction", spotlight.getDirection());
+    shader.setVec3(gl, "spotlight.direction", spotlight.getDirectionPoint());
     shader.setFloat(gl, "spotlight.cutoff", spotlight.getCutoff());
 
     shader.setVec3(gl, "material.ambient", material.getAmbient());
