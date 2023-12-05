@@ -34,8 +34,8 @@ public class SecuritySpotlight {
     this.light2 = light2;
     this.bulbModel = makeBulb(gl);
 
-    poleModel = makeSphere(gl, new Vec3());
-    headModel = makeSphere(gl, new Vec3());
+    poleModel = makeSphere(gl, new Vec3(1, 1, 1));
+    headModel = makeSphere(gl, new Vec3(1, 1, 1));
     
     float poleLength = 8f;
     Vec3 poleScale = new Vec3(0.5f, poleLength, 0.5f);
@@ -146,7 +146,7 @@ public class SecuritySpotlight {
   private ObjectModelColoured makeSphere(GL3 gl, Vec3 colour) {
     String name= "sphere";
     Mesh mesh = new Mesh(gl, Sphere.vertices, Sphere.indices);
-    Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_2t.txt");
+    Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_c.txt");
     Material material = new Material(new Vec3(1.0f, 0.5f, 0.31f), new Vec3(1.0f, 0.5f, 0.31f), new Vec3(0.5f, 0.5f, 0.5f), 32.0f);
     Mat4 modelMatrix = new Mat4(1);
     ObjectModelColoured sphere = new ObjectModelColoured(name, mesh, modelMatrix, shader, material, camera, light1, light2, bulbModel, colour);

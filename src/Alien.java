@@ -46,9 +46,9 @@ public class Alien {
     headModel = makeSphere(gl, t3,t4);
     armModel = makeSphere(gl, t5,t6);
     earModel = makeSphere(gl, t7,t8);
-    eyeModel = makeSphere(gl, new Vec3());
-    antennaRodModel = makeSphere(gl, new Vec3());
-    antennaBallModel = makeSphere(gl, new Vec3());
+    eyeModel = makeSphere(gl, new Vec3(1, 1, 1));
+    antennaRodModel = makeSphere(gl, new Vec3(1, 1, 1));
+    antennaBallModel = makeSphere(gl, new Vec3(1, 1, 1));
 
     // alien
     
@@ -255,7 +255,7 @@ public class Alien {
   private ObjectModelColoured makeSphere(GL3 gl, Vec3 colour) {
     String name= "sphere";
     Mesh mesh = new Mesh(gl, Sphere.vertices, Sphere.indices);
-    Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_2t.txt");
+    Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_c.txt");
     Material material = new Material(new Vec3(1.0f, 0.5f, 0.31f), new Vec3(1.0f, 0.5f, 0.31f), new Vec3(0.5f, 0.5f, 0.5f), 32.0f);
     Mat4 modelMatrix = new Mat4(1);
     ObjectModelColoured sphere = new ObjectModelColoured(name, mesh, modelMatrix, shader, material, camera, light1, light2, spotlight, colour);
