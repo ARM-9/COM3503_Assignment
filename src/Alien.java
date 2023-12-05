@@ -17,7 +17,14 @@ public class Alien {
   private LightModel light2;
   private LightModel spotlight;
 
-  private ObjectModel sphere;
+  private ObjectModelTwoTex bodyModel;
+  private ObjectModelTwoTex headModel;
+  private ObjectModelTwoTex armModel;
+  private ObjectModelTwoTex earModel;
+  private ObjectModelColoured eyeModel;
+  private ObjectModelColoured antennaRodModel;
+  private ObjectModelColoured antennaBallModel;
+
 
   private SGNode alienRoot;
   private TransformNode bodyRock, headRoll;
@@ -25,7 +32,7 @@ public class Alien {
   private TransformNode leftEarRotate, rightEarRotate;
   private TransformNode antennaRotate;
    
-  public Alien(GL3 gl, Camera camera, LightModel light1, LightModel light2, LightModel spotlight, Texture t1, Texture t2, float xPos) {
+  public Alien(GL3 gl, Camera camera, LightModel light1, LightModel light2, LightModel spotlight, Texture t1, Texture t2, Texture t3, Texture t4, Texture t5, Texture t6, Texture t7, Texture t8, float pos) {
     // TODO: Add a litt of textures as a parameter
     // Textures with specular maps may be part of a pair list
     // and singles may be part of another list
@@ -35,16 +42,16 @@ public class Alien {
     this.light2 = light2;
     this.spotlight = spotlight;
 
-    sphere = makeSphere(gl, t1,t2);
-    // TODO: add other spheres for other textures
-    // where each part with a certain texture is
-    // represeted by its own sphere
-    // TODO: Make it so spheres can take colours instead of textures
+    bodyModel = makeSphere(gl, t1,t2);
+    headModel = makeSphere(gl, t3,t4);
+    armModel = makeSphere(gl, t5,t6);
+    earModel = makeSphere(gl, t7,t8);
+    eyeModel = makeSphere(gl, new Vec3());
+    antennaRodModel = makeSphere(gl, new Vec3());
+    antennaBallModel = makeSphere(gl, new Vec3());
 
     // alien
     
-    // Redundant
-    float alienXPosition = xPos; // Will change +/- depending on the alien (R/L)
     float bodyScale = 3f;
     float headScale = 2f;
     float armBendAngle = 30f; // So that arms do not stick out completely straight
@@ -63,7 +70,7 @@ public class Alien {
     // Root
 
     alienRoot = new NameNode("root");
-    TransformNode bodyUpTranslate = new TransformNode("position body (scene)", Mat4Transform.translate(alienXPosition, bodyScale/2, 0));
+    TransformNode bodyUpTranslate = new TransformNode("position body (scene)", Mat4Transform.translate(pos, bodyScale/2, 0));
     bodyRock = new TransformNode("rock body", Mat4Transform.rotateAroundZ(0));
     TransformNode bodyDownTranslate = new TransformNode("position body (origin)", Mat4Transform.translate(0, -(bodyScale/2), 0));
 
@@ -74,7 +81,7 @@ public class Alien {
     m = Mat4.multiply(m, Mat4Transform.scale(bodyScale, bodyScale, bodyScale));
     m = Mat4.multiply(m, Mat4Transform.translate(0,0.5f,0));
     TransformNode bodyTransform = new TransformNode("position body", m);
-    ModelNode bodyShape = new ModelNode("Sphere(body)", sphere);
+    ModelNode bodyShape = new ModelNode("Sphere(body)", bodyModel);
 
     // Arms
 
@@ -87,7 +94,7 @@ public class Alien {
     m = Mat4.multiply(m, Mat4Transform.translate(-(armLength/2), 0, 0));
     m = Mat4.multiply(m, Mat4Transform.scale(armScale));
     TransformNode leftArmTransform = new TransformNode("position left arm", m);
-    ModelNode leftArmShape = new ModelNode("Sphere(left arm)", sphere);
+    ModelNode leftArmShape = new ModelNode("Sphere(left arm)", armModel);
 
     TransformNode rightArmTranslate = new TransformNode("position right arm", Mat4Transform.translate(bodyScale/2, (bodyScale/2), 0));
     rightArmRotate = new TransformNode("rotate right arm", Mat4Transform.rotateAroundX(0));
@@ -98,7 +105,7 @@ public class Alien {
     m = Mat4.multiply(m, Mat4Transform.translate(armLength/2, 0, 0));
     m = Mat4.multiply(m, Mat4Transform.scale(armScale));
     TransformNode rightArmTransform = new TransformNode("position right arm", m);
-    ModelNode rightArmShape = new ModelNode("Sphere(right arm)", sphere);
+    ModelNode rightArmShape = new ModelNode("Sphere(right arm)", armModel);
     
     // Head
 
@@ -111,7 +118,7 @@ public class Alien {
     m = Mat4.multiply(m, Mat4Transform.scale(headScale, headScale, headScale));
     m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
     TransformNode headTransform = new TransformNode("position head", m);
-    ModelNode headShape = new ModelNode("Sphere(head)", sphere);
+    ModelNode headShape = new ModelNode("Sphere(head)", headModel);
 
     // Eyes
 
@@ -122,7 +129,7 @@ public class Alien {
     m = Mat4.multiply(m, Mat4Transform.scale(eyeScale, eyeScale, eyeScale));
     m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
     TransformNode leftEyeTransform = new TransformNode("position left eye", m);
-    ModelNode leftEyeShape = new ModelNode("Sphere(left eye)", sphere);
+    ModelNode leftEyeShape = new ModelNode("Sphere(left eye)", eyeModel);
     
     TransformNode rightEyeTranslate = new TransformNode("position right eye", Mat4Transform.translate(eyeOffset, headScale/2, headScale/2.5f));
 
@@ -131,7 +138,7 @@ public class Alien {
     m = Mat4.multiply(m, Mat4Transform.scale(eyeScale, eyeScale, eyeScale));
     m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
     TransformNode rightEyeTransform = new TransformNode("position right eye", m);
-    ModelNode rightEyeShape = new ModelNode("Sphere(right eye)", sphere);
+    ModelNode rightEyeShape = new ModelNode("Sphere(right eye)", eyeModel);
 
     // Ears
 
@@ -143,7 +150,7 @@ public class Alien {
     m = Mat4.multiply(m, Mat4Transform.scale(earScale));
     m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
     TransformNode leftEarTransform = new TransformNode("left ear transform", m);
-    ModelNode leftEarShape = new ModelNode("Sphere(left ear)", sphere);
+    ModelNode leftEarShape = new ModelNode("Sphere(left ear)", earModel);
 
     TransformNode rightEarTranslate = new TransformNode("position right ear", Mat4Transform.translate(headScale/2, headScale/2, 0));
     rightEarRotate = new TransformNode("rotate right ear", Mat4Transform.rotateAroundX(0));
@@ -153,7 +160,7 @@ public class Alien {
     m = Mat4.multiply(m, Mat4Transform.scale(earScale)); // Todo add ear scale attr
     m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
     TransformNode rightEarTransform = new TransformNode("right ear transform", m);
-    ModelNode rightEarShape = new ModelNode("Sphere(right ear)", sphere);
+    ModelNode rightEarShape = new ModelNode("Sphere(right ear)", earModel);
 
     // Antenna
 
@@ -165,7 +172,7 @@ public class Alien {
     m = Mat4.multiply(m, Mat4Transform.scale(antennaScale));
     m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
     TransformNode antennaRodTransform = new TransformNode("antenna rod transform", m);
-    ModelNode antennaRodShape = new ModelNode("Sphere(antenna rod)", sphere);
+    ModelNode antennaRodShape = new ModelNode("Sphere(antenna rod)", antennaRodModel);
 
     m = Mat4Transform.translate(0, antennaLength, 0);
     TransformNode antennaBallTranslate = new TransformNode("position antenna ball", m);
@@ -175,7 +182,7 @@ public class Alien {
     m = Mat4.multiply(m, Mat4Transform.scale(antennaBallScale, antennaBallScale, antennaBallScale));
     m = Mat4.multiply(m, Mat4Transform.translate(0, 0.5f, 0));
     TransformNode antennaBallTransform = new TransformNode("antenna ball transform", m);
-    ModelNode antennaBallShape = new ModelNode("Sphere(antenna ball)", sphere);
+    ModelNode antennaBallShape = new ModelNode("Sphere(antenna ball)", antennaBallModel);
 
     // Scene graph hierarchy
 
@@ -235,13 +242,23 @@ public class Alien {
 
   }
 
-  private ObjectModel makeSphere(GL3 gl, Texture t1, Texture t2) {
+  private ObjectModelTwoTex makeSphere(GL3 gl, Texture t1, Texture t2) {
     String name= "sphere";
     Mesh mesh = new Mesh(gl, Sphere.vertices, Sphere.indices);
     Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_2t.txt");
     Material material = new Material(new Vec3(1.0f, 0.5f, 0.31f), new Vec3(1.0f, 0.5f, 0.31f), new Vec3(0.5f, 0.5f, 0.5f), 32.0f);
     Mat4 modelMatrix = new Mat4(1);
-    ObjectModel sphere = new ObjectModel(name, mesh, modelMatrix, shader, material, light1, light2, spotlight, camera, t1, t2);
+    ObjectModelTwoTex sphere = new ObjectModelTwoTex(name, mesh, modelMatrix, shader, material, camera, light1, light2, spotlight, t1, t2);
+    return sphere;
+  }
+
+  private ObjectModelColoured makeSphere(GL3 gl, Vec3 colour) {
+    String name= "sphere";
+    Mesh mesh = new Mesh(gl, Sphere.vertices, Sphere.indices);
+    Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_2t.txt");
+    Material material = new Material(new Vec3(1.0f, 0.5f, 0.31f), new Vec3(1.0f, 0.5f, 0.31f), new Vec3(0.5f, 0.5f, 0.5f), 32.0f);
+    Mat4 modelMatrix = new Mat4(1);
+    ObjectModelColoured sphere = new ObjectModelColoured(name, mesh, modelMatrix, shader, material, camera, light1, light2, spotlight, colour);
     return sphere;
   }
 
@@ -305,6 +322,12 @@ public class Alien {
   }
 
   public void dispose(GL3 gl) {
-    sphere.dispose(gl);
+    bodyModel.dispose(gl);
+    headModel.dispose(gl);
+    armModel.dispose(gl);
+    earModel.dispose(gl);
+    eyeModel.dispose(gl);
+    antennaRodModel.dispose(gl);
+    antennaBallModel.dispose(gl);
   }
 }

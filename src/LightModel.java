@@ -3,12 +3,6 @@ import com.jogamp.opengl.*;
   
 public class LightModel extends Model {
 
-  private String name;
-  private Mesh mesh;
-  private Mat4 modelMatrix;
-  private Shader shader;
-  private Material material;
-  private Camera camera;
   private Vec3 position;
   private Vec3 directionPoint;
   private float direction; // Angle from centre that the spotlight is pointing in
@@ -20,14 +14,9 @@ public class LightModel extends Model {
   }
 
   public LightModel(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Camera camera, float direction, float cutoff) {
-    this.name = name;
-    this.mesh = mesh;
-    this.modelMatrix = modelMatrix;
-    this.shader = shader;
-    this.material = material;
-    this.camera = camera;
+    super(name, mesh, modelMatrix, shader, material, camera);
+    position = new Vec3();
     toggleOnOff(); // Turn lights off and set A/D/S values
-    position = new Vec3(3f,2f,1f); // Calculate positions
     this.cutoff = cutoff;
     this.direction = direction;
   }
@@ -46,32 +35,6 @@ public class LightModel extends Model {
   
   public Vec3 getPosition() {
     return position;
-  }
-
-  public String getName() {
-    return this.name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-  public void setMesh(Mesh mesh) {
-    this.mesh = mesh;
-  }
-
-  public Mat4 getModelMatrix() {
-    return this.modelMatrix;
-  }
-
-  public void setModelMatrix(Mat4 modelMatrix) {
-    this.modelMatrix = modelMatrix;
-  }
-  public void setShader(Shader shader) {
-    this.shader = shader;
-  }
-
-  public Camera getCamera() {
-    return this.camera;
   }
 
   public void setDirectionPoint(Vec3 dirPoint) {
@@ -98,26 +61,6 @@ public class LightModel extends Model {
     return cutoff;
   }
 
-  public Mesh getMesh() {
-    return mesh;
-  }
-
-  public Shader getShader() {
-    return shader;
-  }
-  
-  public void setMaterial(Material m) {
-    material = m;
-  }
-  
-  public Material getMaterial() {
-    return material;
-  }
-  
-  public void setCamera(Camera camera) {
-    this.camera = camera;
-  }
-
   public void toggleOnOff() {
     if ( on ) {
       on = false;
@@ -131,12 +74,13 @@ public class LightModel extends Model {
       material.setSpecular(0.6f, 0.6f, 0.6f);
     }
   }
-  
-  public void render(GL3 gl) {
-    render(gl, modelMatrix);
-  }
 
   public void render(GL3 gl, Mat4 modelMatrix) {
+    if (mesh_null()) {
+      System.out.println("Error: null in model render");
+      return;
+    }
+
     Mat4 mvpMatrix = Mat4.multiply(camera.getPerspectiveMatrix(), Mat4.multiply(camera.getViewMatrix(), modelMatrix));
     
     shader.use(gl);
@@ -148,10 +92,6 @@ public class LightModel extends Model {
     }
   
     mesh.render(gl);
-  }
-
-  public void dispose(GL3 gl) {
-    mesh.dispose(gl);
   }
   
 }

@@ -84,7 +84,7 @@ public class A_GLEventListener implements GLEventListener {
 
   public void toggleAnimation(String animationKey) {
     if ( animationKey.equals("sp") ) {
-      securitySpotlight.getSpotlight().toggleOnOff();
+      securitySpotlight.getBulbModel().toggleOnOff();
     }
 
     Animation animation = animations.get(animationKey);
@@ -161,14 +161,20 @@ public class A_GLEventListener implements GLEventListener {
     Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_2t.txt");
     Material material = new Material(new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.3f, 0.3f, 0.3f), 32.0f);
     Mat4 modelMatrix = Mat4Transform.scale(16,1f,16);
-    floor = new ObjectModel(name, mesh, modelMatrix, shader, material, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getSpotlight(), camera, textures.get("jade_diffuse"), textures.get("jade_specular"));
+    floor = new ObjectModelTwoTex(name, mesh, modelMatrix, shader, material, camera, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getBulbModel(), textures.get("jade_diffuse"), textures.get("jade_specular"));
     
-    alien1 = new Alien(gl, camera, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getSpotlight(),
-                      textures.get("jade_diffuse"), textures.get("jade_specular"),
+    alien1 = new Alien(gl, camera, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getBulbModel(),
+                      textures.get("jade_diffuse"), textures.get("jade_specular"), // body
+                      textures.get("jade_diffuse"), textures.get("jade_specular"), // head
+                      textures.get("jade_diffuse"), textures.get("jade_specular"), // arm
+                      textures.get("jade_diffuse"), textures.get("jade_specular"), // ear
                       -3.5f);
     
-    alien2 = new Alien(gl, camera, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getSpotlight(),
-                      textures.get("jade_diffuse"), textures.get("jade_specular"),
+    alien2 = new Alien(gl, camera, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getBulbModel(),
+                      textures.get("jade_diffuse"), textures.get("jade_specular"), // body
+                      textures.get("jade_diffuse"), textures.get("jade_specular"), // head
+                      textures.get("jade_diffuse"), textures.get("jade_specular"), // arm
+                      textures.get("jade_diffuse"), textures.get("jade_specular"), // ear
                       3.5f);
     
     initialiseAnimations();
