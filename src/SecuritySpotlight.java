@@ -34,8 +34,8 @@ public class SecuritySpotlight {
     this.light2 = light2;
     this.bulbModel = makeBulb(gl);
 
-    poleModel = makeSphere(gl, new Vec3(1, 1, 1));
-    headModel = makeSphere(gl, new Vec3(1, 1, 1));
+    poleModel = makeSphere(gl, new Vec3(0.59f, 0.18f, 0.95f));
+    headModel = makeSphere(gl, new Vec3(0.25f, 0.82f, 0.27f));
     
     float poleLength = 8f;
     Vec3 poleScale = new Vec3(0.5f, poleLength, 0.5f);
@@ -160,7 +160,7 @@ public class SecuritySpotlight {
     Material material = new Material();
     Mat4 modelMatrix = new Mat4(1.0f);
     float cutoff = (float)Math.cos(Math.toRadians(30));
-    LightModel bulb = new LightModel(name, mesh, modelMatrix, shader, material, camera, 15, cutoff);
+    LightModel bulb = new LightModel(name, mesh, modelMatrix, shader, material, camera, 30, cutoff);
     return bulb;
   }
 
@@ -169,7 +169,7 @@ public class SecuritySpotlight {
   }
 
   public void spinAnimation(double elapsedTime) {
-    float rotateAngle = 180 * (float)Math.sin(elapsedTime);
+    float rotateAngle = 180 * (float)Math.sin(0.7f * elapsedTime);
     headSpin.setTransform(Mat4Transform.rotateAroundY(rotateAngle));
 
     bulbModel.setPosition(applyTransform(calcBulbPosTransform()));

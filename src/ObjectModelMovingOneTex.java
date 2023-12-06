@@ -4,38 +4,51 @@ import com.jogamp.opengl.util.texture.*;
 
 public class ObjectModelMovingOneTex extends ObjectModel {
   
-  private Texture texture;
+  private Texture firstTexture;
   private float offsetX;
   private float offsetY;
 
   public ObjectModelMovingOneTex() {
     super();
 
-    this.texture = null;
+    this.firstTexture = null;
   }
   
   public ObjectModelMovingOneTex(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Camera camera, LightModel firstLight, LightModel secondLight, LightModel spotlight, Texture texture, float offsetX, float offsetY) {
     super(name, mesh, modelMatrix, shader, material, camera, firstLight, secondLight, spotlight);
 
-    this.texture = texture;
+    this.firstTexture = texture;
     this.offsetX = offsetX;
     this.offsetY = offsetY;
   }
 
-  public Texture getTexture() {
-      return this.texture;
+  public Texture getFirstTexture() {
+      return this.firstTexture;
   }
 
-  public void setTexture(Texture t) {
-    this.texture = t;
+  public void setFirstTexture(Texture t) {
+    this.firstTexture = t;
   }
 
   public float getOffsetX() {
     return offsetX;
   }
 
+  public void setOffsetX(float x) {
+    offsetX = x;
+  }
+
   public float getOffsetY() {
     return offsetY;
+  }
+
+  public void setOffsetY(float y) {
+    offsetX = y;
+  }
+
+  public void setOffset(float x, float y) {
+    offsetX = x;
+    offsetY = y;
   }
 
   public void render(GL3 gl, Mat4 modelMatrix) {
@@ -82,10 +95,10 @@ public class ObjectModelMovingOneTex extends ObjectModel {
     // If there is a mismatch between the number of textures the shader expects and the number we try to set here, then there will be problems.
     // Assumption is the user supplied the right shader and the right number of textures for the model
 
-    if (texture!=null) {
-      shader.setInt(gl, "texture", 0);  // be careful to match these with GL_TEXTURE0 and GL_TEXTURE1
+    if (firstTexture!=null) {
+      shader.setInt(gl, "first_texture", 0);  // be careful to match these with GL_TEXTURE0 and GL_TEXTURE1
       gl.glActiveTexture(GL.GL_TEXTURE0);
-      texture.bind(gl);
+      firstTexture.bind(gl);
     }
 
     // then render the mesh

@@ -4,22 +4,22 @@ import com.jogamp.opengl.util.texture.*;
 
 public class ObjectModelOneTex extends ObjectModel {
   
-  private Texture texture;
+  private Texture firstTexture;
 
   public ObjectModelOneTex() {
     super();
 
-    this.texture = null;
+    this.firstTexture = null;
   }
   
   public ObjectModelOneTex(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Camera camera, LightModel firstLight, LightModel secondLight, LightModel spotlight, Texture texture) {
     super(name, mesh, modelMatrix, shader, material, camera, firstLight, secondLight, spotlight);
 
-    this.texture = texture;
+    this.firstTexture = texture;
   }
 
-  public void setTexture(Texture t) {
-    this.texture = t;
+  public void setFirstTexture(Texture t) {
+    this.firstTexture = t;
   }
 
   // second version of render is so that modelMatrix can be overriden with a new parameter
@@ -65,10 +65,10 @@ public class ObjectModelOneTex extends ObjectModel {
     // If there is a mismatch between the number of textures the shader expects and the number we try to set here, then there will be problems.
     // Assumption is the user supplied the right shader and the right number of textures for the model
 
-    if (texture!=null) {
-      shader.setInt(gl, "texture", 0);
+    if (firstTexture!=null) {
+      shader.setInt(gl, "first_texture", 0);
       gl.glActiveTexture(GL.GL_TEXTURE);
-      texture.bind(gl);
+      firstTexture.bind(gl);
     }
 
     // then render the mesh

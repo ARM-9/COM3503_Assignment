@@ -29,6 +29,8 @@ public class A_GLEventListener implements GLEventListener {
     gl.glFrontFace(GL.GL_CCW);    // default is 'CCW'
     gl.glEnable(GL.GL_CULL_FACE); // default is 'not enabled'
     gl.glCullFace(GL.GL_BACK);   // default is 'back', assuming CCW
+    gl.glEnable(GL.GL_BLEND);
+    gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
     initialise(gl);
   }
   
@@ -51,7 +53,7 @@ public class A_GLEventListener implements GLEventListener {
     GL3 gl = drawable.getGL().getGL3();
     light1.dispose(gl);
     light2.dispose(gl);
-    floor.dispose(gl);
+    skybox.dispose(gl);
     alien1.dispose(gl);
     alien2.dispose(gl);
     securitySpotlight.dispose(gl);
@@ -131,7 +133,7 @@ public class A_GLEventListener implements GLEventListener {
 
   private Camera camera;
   private Mat4 perspective;
-  private ObjectModel floor;
+  private Skybox skybox;
   
   private Alien alien1;
   private Alien alien2;
@@ -145,6 +147,22 @@ public class A_GLEventListener implements GLEventListener {
     textures = new TextureLibrary();
     textures.add(gl, "jade_diffuse", "textures/jade.jpg");
     textures.add(gl, "jade_specular", "textures/jade_specular.jpg");
+    textures.add(gl, "giraffe_diffuse", "textures/giraffe.jpg");
+    textures.add(gl, "giraffe_specular", "textures/giraffe_specular.jpg");
+    textures.add(gl, "zebra", "textures/zebra.jpg");
+    textures.add(gl, "tiger_diffuse", "textures/tiger.jpg");
+    textures.add(gl, "tiger_specular", "textures/tiger_specular.jpg");
+    textures.add(gl, "leopard_diffuse", "textures/leopard.jpg");
+    textures.add(gl, "leopard_specular", "textures/leopard_specular.jpg");
+    textures.add(gl, "oak", "textures/oak.jpg");
+    textures.add(gl, "mahogany", "textures/mahogany.jpg");
+    textures.add(gl, "white_marble", "textures/white_marble.jpg");
+    textures.add(gl, "pink_marble", "textures/pink_marble.jpg");
+    textures.add(gl, "snowy_background", "textures/snowy_background.jpeg");
+    textures.add(gl, "snowy_background_flipped", "textures/snowy_background_flipped.jpeg");
+    textures.add(gl, "snow", "textures/snow.png");
+    textures.add(gl, "sky", "textures/sky.jpeg");
+
 
     light1 = new GlobalLight(gl, camera, new Vec3(5, 10, 5));
     light2 = new GlobalLight(gl, camera, new Vec3(-5, 10, 5));
@@ -153,29 +171,29 @@ public class A_GLEventListener implements GLEventListener {
     
     securitySpotlight = new SecuritySpotlight(gl, camera, light1.getLightModel(), light2.getLightModel(),
                                    textures.get("jade_diffuse"), textures.get("jade_specular"),
-                                  new Vec3(0, 0, -2));
+                                  new Vec3(0, 0, -3));
 
-    // floor
-    String name = "floor";
-    Mesh mesh = new Mesh(gl, TwoTriangles.vertices.clone(), TwoTriangles.indices.clone());
-    Shader shader = new Shader(gl, "shaders/vs_moving.txt", "shaders/fs_moving_2t.txt");
-    Material material = new Material(new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.0f, 0.5f, 0.81f), new Vec3(0.3f, 0.3f, 0.3f), 32.0f);
-    Mat4 modelMatrix = Mat4Transform.scale(16,1f,16);
-    floor = new ObjectModelTwoTex(name, mesh, modelMatrix, shader, material, camera, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getBulbModel(), textures.get("jade_diffuse"), textures.get("jade_specular"));
+    skybox = new Skybox(gl, camera, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getBulbModel(), textures.get("snowy_background"), textures.get("snowy_background_flipped"), textures.get("sky"), textures.get("snow"));
     
     alien1 = new Alien(gl, camera, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getBulbModel(),
-                      textures.get("jade_diffuse"), textures.get("jade_specular"), // body
-                      textures.get("jade_diffuse"), textures.get("jade_specular"), // head
-                      textures.get("jade_diffuse"), textures.get("jade_specular"), // arm
-                      textures.get("jade_diffuse"), textures.get("jade_specular"), // ear
-                      -3.5f);
+                      textures.get("giraffe_diffuse"), textures.get("giraffe_specular"), // body
+                      textures.get("zebra"), textures.get("zebra"), // head
+                      textures.get("oak"), // arm
+                      textures.get("white_marble"), // ear
+                      new Vec3(new Vec3(1, 0.87f, 0)), // eye
+                      new Vec3(1, 0, 0), // antenna rod
+                      new Vec3(0, 0, 1), // antenna ball
+                      -5f);
     
     alien2 = new Alien(gl, camera, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getBulbModel(),
-                      textures.get("jade_diffuse"), textures.get("jade_specular"), // body
-                      textures.get("jade_diffuse"), textures.get("jade_specular"), // head
-                      textures.get("jade_diffuse"), textures.get("jade_specular"), // arm
-                      textures.get("jade_diffuse"), textures.get("jade_specular"), // ear
-                      3.5f);
+                      textures.get("leopard_diffuse"), textures.get("leopard_specular"), // body
+                      textures.get("tiger_diffuse"), textures.get("tiger_specular"), // head
+                      textures.get("mahogany"), // arm
+                      textures.get("pink_marble"), // ear
+                      new Vec3(new Vec3(0.65f, 0.66f, 0.71f)), // eye
+                      new Vec3(0, 0, 1), // antenna rod
+                      new Vec3(1, 0, 0), // antenna ball
+                      5f);
     
     initialiseAnimations();
   }
@@ -184,7 +202,9 @@ public class A_GLEventListener implements GLEventListener {
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
     light1.render(gl);
     light2.render(gl);
-    floor.render(gl);
+
+    skybox.moveTextures(getSeconds());
+    skybox.render(gl);
 
     for (Animation a : animations.values()) {
       if ( a.getMoving() ) {

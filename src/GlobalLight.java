@@ -23,7 +23,6 @@ public class GlobalLight {
     this.camera = camera;
 
     bulb = makeBulb(gl);
-    System.out.println(bulb.getShader().getID());
     
     Mat4 m;
 

@@ -45,8 +45,21 @@ public class ObjectModelMovingTwoTex extends ObjectModel {
     return offsetX;
   }
 
+  public void setOffsetX(float x) {
+    offsetX = x;
+  }
+
   public float getOffsetY() {
     return offsetY;
+  }
+
+  public void setOffsetY(float y) {
+    offsetX = y;
+  }
+
+  public void setOffset(float x, float y) {
+    offsetX = x;
+    offsetY = y;
   }
 
   public void render(GL3 gl, Mat4 modelMatrix) {

@@ -32,7 +32,7 @@ public class Alien {
   private TransformNode leftEarRotate, rightEarRotate;
   private TransformNode antennaRotate;
    
-  public Alien(GL3 gl, Camera camera, LightModel light1, LightModel light2, LightModel spotlight, Texture t1, Texture t2, Texture t3, Texture t4, Texture t5, Texture t6, Texture t7, Texture t8, float pos) {
+  public Alien(GL3 gl, Camera camera, LightModel light1, LightModel light2, LightModel spotlight, Texture t1, Texture t2, Texture t3, Texture t4, Texture t5, Texture t6, Vec3 eyeColour, Vec3 antennaRodColour, Vec3 antennaBallColour, float pos) {
     // TODO: Add a litt of textures as a parameter
     // Textures with specular maps may be part of a pair list
     // and singles may be part of another list
@@ -44,11 +44,11 @@ public class Alien {
 
     bodyModel = makeSphere(gl, t1,t2);
     headModel = makeSphere(gl, t3,t4);
-    armModel = makeSphere(gl, t5,t6);
-    earModel = makeSphere(gl, t7,t8);
-    eyeModel = makeSphere(gl, new Vec3(1, 1, 1));
-    antennaRodModel = makeSphere(gl, new Vec3(1, 1, 1));
-    antennaBallModel = makeSphere(gl, new Vec3(1, 1, 1));
+    armModel = makeSphere(gl, t5, t5);
+    earModel = makeSphere(gl, t6, t6);
+    eyeModel = makeSphere(gl, eyeColour);
+    antennaRodModel = makeSphere(gl, antennaRodColour);
+    antennaBallModel = makeSphere(gl, antennaBallColour);
 
     // alien
     
@@ -86,7 +86,7 @@ public class Alien {
     // Arms
 
     TransformNode leftArmTranslate = new TransformNode("position left arm", Mat4Transform.translate(-(bodyScale/2), (bodyScale/2), 0));
-    leftArmRotate = new TransformNode("rotate left arm", Mat4Transform.rotateAroundX(0));
+    leftArmRotate = new TransformNode("rotate left arm", Mat4Transform.rotateAroundZ(0));
     TransformNode leftArmBend = new TransformNode("bend left arm", Mat4Transform.rotateAroundZ(-armBendAngle));
 
     NameNode leftArm = new NameNode("left arm");
@@ -97,7 +97,7 @@ public class Alien {
     ModelNode leftArmShape = new ModelNode("Sphere(left arm)", armModel);
 
     TransformNode rightArmTranslate = new TransformNode("position right arm", Mat4Transform.translate(bodyScale/2, (bodyScale/2), 0));
-    rightArmRotate = new TransformNode("rotate right arm", Mat4Transform.rotateAroundX(0));
+    rightArmRotate = new TransformNode("rotate right arm", Mat4Transform.rotateAroundZ(0));
     TransformNode rightArmBend = new TransformNode("bend right arm", Mat4Transform.rotateAroundZ(armBendAngle));
 
     NameNode rightArm = new NameNode("right arm");
@@ -269,8 +269,8 @@ public class Alien {
   public void resetPosition() {
     bodyRock.setTransform(Mat4Transform.rotateAroundZ(0));
     bodyRock.update();
-    leftArmRotate.setTransform(Mat4Transform.rotateAroundX(0));
-    rightArmRotate.setTransform(Mat4Transform.rotateAroundX(0));
+    leftArmRotate.setTransform(Mat4Transform.rotateAroundZ(0));
+    rightArmRotate.setTransform(Mat4Transform.rotateAroundZ(0));
     leftArmRotate.update();
     rightArmRotate.update();
     headRoll.setTransform(Mat4Transform.rotateAroundZ(0));
@@ -294,9 +294,9 @@ public class Alien {
   }
 
   public void waveArmsAnimation(double elapsedTime) {
-    float rotateAngle = 60f*(float)Math.sin(elapsedTime);
-    leftArmRotate.setTransform(Mat4Transform.rotateAroundX(rotateAngle));
-    rightArmRotate.setTransform(Mat4Transform.rotateAroundX(rotateAngle));
+    float rotateAngle = 30f*(float)Math.sin(1.5f * elapsedTime);
+    leftArmRotate.setTransform(Mat4Transform.rotateAroundZ(rotateAngle));
+    rightArmRotate.setTransform(Mat4Transform.rotateAroundZ(rotateAngle));
     leftArmRotate.update();
     rightArmRotate.update();
   }
@@ -308,7 +308,7 @@ public class Alien {
   }
 
   public void flapEarsAnimation(double elapsedTime) {
-    float rotateAngle = 30f*(float)Math.sin(elapsedTime);
+    float rotateAngle = 30f*(float)Math.sin(1.5f * elapsedTime);
     leftEarRotate.setTransform(Mat4Transform.rotateAroundX(rotateAngle));
     rightEarRotate.setTransform(Mat4Transform.rotateAroundX(rotateAngle));
     leftEarRotate.update();
@@ -316,7 +316,7 @@ public class Alien {
   }
 
   public void spinAntennaAnimation(double elapsedTime) {
-    float rotateAngle = 30f*(float)Math.sin(elapsedTime);
+    float rotateAngle = 30f*(float)Math.sin(1.5f * elapsedTime);
     antennaRotate.setTransform(Mat4Transform.rotateAroundZ(rotateAngle));
     antennaRotate.update();
   }
