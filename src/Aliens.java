@@ -6,7 +6,7 @@ import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
 
-public class Main extends JFrame implements ActionListener {
+public class Aliens extends JFrame implements ActionListener {
   
   private static final int WIDTH = 1024;
   private static final int HEIGHT = 768;
@@ -17,13 +17,13 @@ public class Main extends JFrame implements ActionListener {
   private Camera camera;
 
   public static void main(String[] args) {
-    Main b1 = new Main("M04");
+    Aliens b1 = new Aliens("M04");
     b1.getContentPane().setPreferredSize(dimension);
     b1.pack();
     b1.setVisible(true);
   }
 
-  public Main(String textForTitleBar) {
+  public Aliens(String textForTitleBar) {
     super(textForTitleBar);
     GLCapabilities glcapabilities = new GLCapabilities(GLProfile.get(GLProfile.GL3));
     canvas = new GLCanvas(glcapabilities);

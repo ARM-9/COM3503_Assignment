@@ -181,8 +181,8 @@ public class A_GLEventListener implements GLEventListener {
                       textures.get("oak"), // arm
                       textures.get("white_marble"), // ear
                       new Vec3(new Vec3(1, 0.87f, 0)), // eye
-                      new Vec3(1, 0, 0), // antenna rod
-                      new Vec3(0, 0, 1), // antenna ball
+                      new Vec3(0.13f, 0.21f, 0.94f), // antenna rod
+                      new Vec3(0.92f, 0.13f, 0.87f), // antenna ball
                       -5f);
     
     alien2 = new Alien(gl, camera, light1.getLightModel(), light2.getLightModel(), securitySpotlight.getBulbModel(),
@@ -191,8 +191,8 @@ public class A_GLEventListener implements GLEventListener {
                       textures.get("mahogany"), // arm
                       textures.get("pink_marble"), // ear
                       new Vec3(new Vec3(0.65f, 0.66f, 0.71f)), // eye
-                      new Vec3(0, 0, 1), // antenna rod
-                      new Vec3(1, 0, 0), // antenna ball
+                      new Vec3(0.13f, 0.42f, 0.95f), // antenna rod
+                      new Vec3(0.38f, 0.13f, 0.95f), // antenna ball
                       5f);
     
     initialiseAnimations();

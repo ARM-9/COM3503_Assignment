@@ -34,8 +34,10 @@ public class SecuritySpotlight {
     this.light2 = light2;
     this.bulbModel = makeBulb(gl);
 
-    poleModel = makeSphere(gl, new Vec3(0.59f, 0.18f, 0.95f));
-    headModel = makeSphere(gl, new Vec3(0.25f, 0.82f, 0.27f));
+    poleModel = makeSphere(gl, new Vec3(0.59f, 0.18f, 0.95f),
+      new Material(new Vec3(0.33f, 0.22f, 0.03f), new Vec3(0.78f, 0.57f, 0.11f), new Vec3(0.99f, 0.94f, 0.80f), 27.9f));
+    headModel = makeSphere(gl, new Vec3(0.25f, 0.82f, 0.27f),
+      new Material(new Vec3(0.25f, 0.15f, 0.06f), new Vec3(0.4f, 0.24f, 0.10f), new Vec3(0.77f, 0.46f, 0.20f), 76.8f));
     
     float poleLength = 8f;
     Vec3 poleScale = new Vec3(0.5f, poleLength, 0.5f);
@@ -143,11 +145,10 @@ public class SecuritySpotlight {
     return bulbModel;
   }
 
-  private ObjectModelColoured makeSphere(GL3 gl, Vec3 colour) {
+  private ObjectModelColoured makeSphere(GL3 gl, Vec3 colour, Material material) {
     String name= "sphere";
     Mesh mesh = new Mesh(gl, Sphere.vertices, Sphere.indices);
     Shader shader = new Shader(gl, "shaders/vs_standard.txt", "shaders/fs_standard_c.txt");
-    Material material = new Material(new Vec3(1.0f, 0.5f, 0.31f), new Vec3(1.0f, 0.5f, 0.31f), new Vec3(0.5f, 0.5f, 0.5f), 32.0f);
     Mat4 modelMatrix = new Mat4(1);
     ObjectModelColoured sphere = new ObjectModelColoured(name, mesh, modelMatrix, shader, material, camera, light1, light2, bulbModel, colour);
     return sphere;
