@@ -2,40 +2,40 @@ import gmaths.*;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.util.texture.*;
 
-public class ObjectModelTwoTex extends ObjectModel {
+public class ObjectModelMovingOneTex extends ObjectModel {
   
-  private Texture diffuse;
-  private Texture specular;
+  private Texture texture;
+  private float offsetX;
+  private float offsetY;
 
-  public ObjectModelTwoTex() {
+  public ObjectModelMovingOneTex() {
     super();
 
-    this.diffuse = null;
-    this.specular = null;
+    this.texture = null;
   }
   
-  public ObjectModelTwoTex(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Camera camera, LightModel firstLight, LightModel secondLight, LightModel spotlight, Texture diffuse, Texture specular) {
+  public ObjectModelMovingOneTex(String name, Mesh mesh, Mat4 modelMatrix, Shader shader, Material material, Camera camera, LightModel firstLight, LightModel secondLight, LightModel spotlight, Texture texture, float offsetX, float offsetY) {
     super(name, mesh, modelMatrix, shader, material, camera, firstLight, secondLight, spotlight);
 
-    this.diffuse = diffuse;
-    this.specular = specular;
+    this.texture = texture;
+    this.offsetX = offsetX;
+    this.offsetY = offsetY;
   }
 
-  public Texture getDiffuse() {
-      return this.diffuse;
+  public Texture getTexture() {
+      return this.texture;
   }
 
-  public void setDiffuse(Texture t) {
-    this.diffuse = t;
+  public void setTexture(Texture t) {
+    this.texture = t;
   }
 
-  public Texture getSpecular() {
-    return this.specular;
+  public float getOffsetX() {
+    return offsetX;
   }
 
-
-  public void setSpecular(Texture t) {
-    this.specular = t;
+  public float getOffsetY() {
+    return offsetY;
   }
 
   public void render(GL3 gl, Mat4 modelMatrix) {
@@ -77,18 +77,15 @@ public class ObjectModelTwoTex extends ObjectModel {
     shader.setVec3(gl, "material.specular", material.getSpecular());
     shader.setFloat(gl, "material.shininess", material.getShininess());
 
+    shader.setFloat(gl, "offset", offsetX, offsetY);
+
     // If there is a mismatch between the number of textures the shader expects and the number we try to set here, then there will be problems.
     // Assumption is the user supplied the right shader and the right number of textures for the model
 
-    if (diffuse!=null) {
-      shader.setInt(gl, "first_texture", 0);  // be careful to match these with GL_TEXTURE0 and GL_TEXTURE1
+    if (texture!=null) {
+      shader.setInt(gl, "texture", 0);  // be careful to match these with GL_TEXTURE0 and GL_TEXTURE1
       gl.glActiveTexture(GL.GL_TEXTURE0);
-      diffuse.bind(gl);
-    }
-    if (specular!=null) {
-      shader.setInt(gl, "second_texture", 1);
-      gl.glActiveTexture(GL.GL_TEXTURE1);
-      specular.bind(gl);
+      texture.bind(gl);
     }
 
     // then render the mesh
